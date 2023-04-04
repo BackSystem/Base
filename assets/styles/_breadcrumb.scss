@@ -1,0 +1,9 @@
+.breadcrumb-item a {
+	color: $gray-600;
+	text-decoration: none;
+	transition: color .15s ease-in-out;
+
+	&:hover {
+		color: $info;
+	}
+}

@@ -1,0 +1,4 @@
+locale:
+    controller: 'BackSystem\Base\Controller\LocaleController::locale'
+    methods: ['GET']
+    path: /locale/{locale}

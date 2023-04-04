@@ -1,0 +1,33 @@
+.table th {
+	vertical-align: middle;
+}
+
+.table > :not(:first-child) {
+	border-top: 0;
+}
+
+.table.table-bordered {
+	border-radius: $border-radius;
+	overflow: hidden;
+	box-shadow: 0 0 0 1px $table-border-color;
+
+	tr:first-child {
+		border-top: 0;
+	}
+
+	tr td:last-child, tr th:last-child {
+		border-right: 0;
+	}
+
+	tbody tr:last-child {
+		border-bottom: 0;
+	}
+
+	tr td:first-child, tr th:first-child {
+		border-left: 0;
+	}
+}
+
+.table-fixed {
+	table-layout: fixed;
+}
