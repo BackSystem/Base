@@ -57,7 +57,7 @@ class ControllerMaker extends AbstractMaker
             'controller' => $controller,
             'route_url' => u($pluralizedName)->snake()->replace('_', '-'),
             'route_name' => u($layer)->snake()->lower().'_'.u($name)->snake().'_index',
-            'template_path' => u($layer)->snake()->lower().'/'.u($name)->snake().'/index.html.twig',
+            'template_path' => u($layer)->snake()->lower().'/'.u($name)->snake().'/add.html.twig',
         ], $output);
 
         $title = ucfirst(strtolower(trim(preg_replace('/(?<! )[A-Z]/', ' $0', $pluralizedName) ?? '')));
@@ -65,7 +65,7 @@ class ControllerMaker extends AbstractMaker
         $this->createTemplate('Template', [
             'layer' => strtolower($layer),
             'title' => $title,
-        ], 'templates/'.strtolower($layer).'/'.u($name)->snake().'/index.html.twig');
+        ], 'templates/'.strtolower($layer).'/'.u($name)->snake().'/add.html.twig');
 
         $this->writeSuccessMessage($io);
 

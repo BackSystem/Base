@@ -3,8 +3,15 @@
 namespace BackSystem\Base\Helper\Paginator;
 
 use Doctrine\ORM\Query;
+use Knp\Component\Pager\Pagination\PaginationInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
+/**
+ * @template TKey
+ * @template TValue
+ *
+ * @template-implements PaginatorInterface<TKey, TValue>
+ */
 class Paginator implements PaginatorInterface
 {
     /**
@@ -16,7 +23,7 @@ class Paginator implements PaginatorInterface
     {
     }
 
-    public function paginate(Query $query): void
+    public function paginate(Query $query): PaginationInterface
     {
         $request = $this->requestStack->getCurrentRequest();
         $page = $request ? $request->query->getInt('page', 1) : 1;
@@ -33,6 +40,8 @@ class Paginator implements PaginatorInterface
         if ($pagination->getTotalItemCount() && ceil($pagination->getTotalItemCount() / $pagination->getItemNumberPerPage()) < $page) {
             throw new PageOutOfBoundException();
         }
+
+        return $pagination;
     }
 
     public function allowSort(string ...$fields): self

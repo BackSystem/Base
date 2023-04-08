@@ -5,7 +5,7 @@
 		{%- set attr = attr | merge({ class: ((attr.class | default('')) ~ ' is-invalid') }) -%}
 	{%- endif -%}
 
-	{%- if type is defined and type != 'hidden' -%}
+	{%- if type is not defined or type != 'hidden' -%}
 		{%- set attr = attr | merge({ autocomplete: (attr.autocomplete | default('off')) | trim, placeholder: (attr.placeholder | default(label) | default(name | humanize)) | trim }) -%}
 	{%- endif -%}
 
@@ -30,7 +30,9 @@
 {%- block form_errors -%}
 	{%- if errors | length > 0 -%}
 		{%- for error in errors -%}
-			<div class="invalid-feedback">{{ error.message }}</div>
+			{%- set attr = attr | merge({ class: ('invalid-feedback ' ~ (attr.class | default(''))) }) -%}
+
+			<div {% with { attr } %}{{ block('attributes') }}{% endwith %}>{{ error.message }}</div>
 		{%- endfor -%}
 	{%- endif -%}
 {%- endblock form_errors -%}

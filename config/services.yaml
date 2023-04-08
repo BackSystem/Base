@@ -3,6 +3,12 @@ services:
         tags: [ 'controller.service_arguments' ]
         arguments: [ '@security.helper', '@router', '@?' ]
 
+    BackSystem\Base\Helper\Paginator\Paginator:
+        class: 'BackSystem\Base\Helper\Paginator\Paginator'
+        arguments: [ '@knp_paginator', '@request_stack' ]
+
+    BackSystem\Base\Helper\Paginator\PaginatorInterface: '@BackSystem\Base\Helper\Paginator\Paginator'
+
     BackSystem\Base\Maker\ControllerMaker:
         tags: [ 'maker.command' ]
         arguments: [ '@kernel', '@filesystem' ]
