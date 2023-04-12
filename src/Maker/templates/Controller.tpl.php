@@ -2,7 +2,7 @@
 
 namespace App\Http\<?php echo $layer; ?>\Controller;
 
-use App\Infrastructure\Controller\AbstractController;
+use BackSystem\Base\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
