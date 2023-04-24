@@ -20,21 +20,25 @@ class TimeExtension extends AbstractExtension
         ];
     }
 
-    public function ago(\DateTimeInterface $input): string
+    public function ago(\DateTimeInterface $input, bool $onlyDate = false): string
     {
-        return $this->duration((new \DateTime())->diff($input));
+        $difference = (new \DateTime())->diff($input);
+
+        $duration = $this->duration($difference, $onlyDate);
+
+        if ($difference->invert) {
+            return $this->translator->trans('%time% ago', ['%time%' => $duration]);
+        }
+
+        return $this->translator->trans('in %time%', ['%time%' => $duration]);
     }
 
-    public function duration(int|string|\DateTimeInterface|\DateInterval $input, bool $onlyDate = false): string
+    public function duration(int|\DateInterval $input, bool $onlyDate = false): string
     {
         $dtF = new \DateTime('@0');
 
         if (!$input instanceof \DateInterval) {
-            if ($input instanceof \DateTimeInterface) {
-                $dtT = $input;
-            } else {
-                $dtT = new \DateTime("@$input");
-            }
+            $dtT = new \DateTime("@$input");
 
             $difference = $dtF->diff($dtT);
         } else {
@@ -79,11 +83,9 @@ class TimeExtension extends AbstractExtension
         $last = array_pop($parts);
 
         if ($parts) {
-            $time = implode(', ', $parts).' '.$this->translator->trans('and').' '.$last;
-
-            return $this->translator->trans('%time% ago', ['%time%' => $time]);
+            return implode(', ', $parts).' '.$this->translator->trans('and').' '.$last;
         }
 
-        return $this->translator->trans('%time% ago', ['%time%' => $last ?? '']);
+        return $last ?? '';
     }
 }

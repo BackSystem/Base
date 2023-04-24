@@ -1,3 +1,4 @@
+and: 'et'
 year: 'an'
 years: 'ans'
 month: 'mois'
@@ -12,3 +13,4 @@ second: 'seconde'
 seconds: 'secondes'
 
 '%time% ago': 'il y a %time%'
+'in %time%': 'dans %time%'

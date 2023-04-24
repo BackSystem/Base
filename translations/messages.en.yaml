@@ -1,3 +1,4 @@
+and: 'and'
 year: 'year'
 years: 'years'
 month: 'month'
@@ -12,3 +13,4 @@ second: 'second'
 seconds: 'seconds'
 
 '%time% ago': '%time% ago'
+'in %time%': 'in %time%'

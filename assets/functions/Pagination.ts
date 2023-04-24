@@ -2,7 +2,7 @@ import { onClick } from './Event'
 import { html } from './Dom'
 
 const setPagination = (selector: string) => {
-	onClick(selector + ' .page-link', event => {
+	onClick(selector + ' a.page-link', event => {
 		event.preventDefault()
 
 		const target = event.target as HTMLLinkElement

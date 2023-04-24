@@ -1,6 +1,6 @@
 <?php
 
-$finder = PhpCsFixer\Finder::create()->in('./src/');
+$finder = PhpCsFixer\Finder::create()->in('./');
 
 $config = new PhpCsFixer\Config();
 
