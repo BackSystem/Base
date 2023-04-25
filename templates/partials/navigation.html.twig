@@ -1,4 +1,4 @@
-<h1 class="h2 d-inline">{{ title | default('Dashboard' | trans) }}</h1>
+<h1 class="h2 fw-normal d-inline">{{ title }}</h1>
 {% if subtitle is defined %}
     <small class="ms-2">{{ subtitle }}</small>
 {% endif %}
@@ -26,7 +26,8 @@
         }
     } %}
     {% if button.url is defined %}
-        <a href="{{ button.url }}"{% else %}<button{% endif %} class="btn btn-{{ button.color is defined ? button.color : types[button.type].color | default('danger') }} float-end" {% for key, value in button.attr | default([]) %}{{ key | u.snake | replace({ '_': '-' }) }}="{{ value }}"{% endfor %}>
+        <a href="{{ button.url }}"{% else %}<button{% endif %}
+    class="btn btn-{{ button.color is defined ? button.color : types[button.type].color | default('danger') }} float-end" {% for key, value in button.attr | default([]) %}{{ key | u.snake | replace({ '_': '-' }) }}="{{ value }}"{% endfor %}>
     {% if button.icon is defined %}
         {{ icon('solid/' ~ button.icon, { class: 'me-2' }) }}
     {% elseif types[button.type] is defined %}
@@ -48,19 +49,10 @@
     {{ include | raw }}
 {% endif %}
 
-<hr>
-<nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-        {% if app.request.get('_route') starts with 'admin_' %}
-            <li class="breadcrumb-item">
-                <a href="{{ url('admin_home_index') }}">{{ 'Administration' | trans }}</a>
-            </li>
-        {% else %}
-            <li class="breadcrumb-item">
-                <a href="{{ url('home_index') }}">{{ 'Dashboard' | trans }}</a>
-            </li>
-        {% endif %}
-        {% if items is defined %}
+{% if items is defined %}
+    <hr>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
             {% for item in items %}
                 {% if item.name is not empty and (item.condition is not defined or item.condition == true) %}
                     <li class="breadcrumb-item{{ item.active is defined ? ' active' }}"{{ item.active is defined ? ' aria-current="page"' }}>
@@ -72,7 +64,7 @@
                     </li>
                 {% endif %}
             {% endfor %}
-        {% endif %}
-    </ol>
-</nav>
+        </ol>
+    </nav>
+{% endif %}
 <hr>
