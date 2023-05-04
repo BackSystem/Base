@@ -29,6 +29,11 @@ class ForeignKeysSubscriber implements EventSubscriberInterface
             $schema = $this->getSchema($classMetadata->getName());
 
             if ($schema) {
+                // Todo: Improve this
+                if ($_ENV['APP_ENV'] === 'test') {
+                    $schema .= '_test';
+                }
+
                 $table['schema'] = $schema;
             }
         }
@@ -49,6 +54,11 @@ class ForeignKeysSubscriber implements EventSubscriberInterface
 
         foreach ($entityManager->getMetadataFactory()->getAllMetadata() as $metaData) {
             $schemaName = $metaData->getSchemaName();
+
+            // Todo: Improve this
+            if ($_ENV['APP_ENV'] === 'test') {
+                $schemaName .= '_test';
+            }
 
             // This is an entity on another database, we don't want to handle it
             if ($schemaName && $schemaName !== $mainSchemaName) {
@@ -77,16 +87,16 @@ class ForeignKeysSubscriber implements EventSubscriberInterface
                             $options['onDelete'] = $inverseColumn['onDelete'];
                         }
 
-                        $foreignTable = $targetSchemaName.'.'.$targetMetaData->getTableName();
+                        $foreignTable = $targetSchemaName . '.' . $targetMetaData->getTableName();
 
                         // Add the foreign key
                         $schema->getTable($mapping['joinTable']['name'])
-                               ->addForeignKeyConstraint(
-                                   $foreignTable,
-                                   [$inverseColumn['name']],
-                                   [$inverseColumn['referencedColumnName']],
-                                   $options
-                               );
+                            ->addForeignKeyConstraint(
+                                $foreignTable,
+                                [$inverseColumn['name']],
+                                [$inverseColumn['referencedColumnName']],
+                                $options
+                            );
                     }
                 } elseif (!empty($mapping['joinColumns'])) {
                     foreach ($mapping['joinColumns'] as $joinColumn) {
@@ -96,16 +106,16 @@ class ForeignKeysSubscriber implements EventSubscriberInterface
                             $options['onDelete'] = $joinColumn['onDelete'];
                         }
 
-                        $foreignTable = $targetSchemaName.'.'.$targetMetaData->getTableName();
+                        $foreignTable = $targetSchemaName . '.' . $targetMetaData->getTableName();
 
                         // Add the foreign key
                         $schema->getTable($metaData->getTableName())
-                               ->addForeignKeyConstraint(
-                                   $foreignTable,
-                                   [$joinColumn['name']],
-                                   [$joinColumn['referencedColumnName']],
-                                   $options
-                               );
+                            ->addForeignKeyConstraint(
+                                $foreignTable,
+                                [$joinColumn['name']],
+                                [$joinColumn['referencedColumnName']],
+                                $options
+                            );
                     }
                 }
             }

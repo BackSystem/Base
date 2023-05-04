@@ -42,11 +42,13 @@ class DatabaseSubscriber implements EventSubscriberInterface
             $hasCreatedBy = method_exists($object, 'getCreatedBy') && method_exists($object, 'setCreatedBy');
             $hasCreatedAt = method_exists($object, 'getCreatedAt') && method_exists($object, 'setCreatedAt');
 
-            $user = $this->security->getUser();
-
             if ($hasCreatedBy) {
+                if (null === $this->security->getUser()) {
+                    continue;
+                }
+
                 /* @phpstan-ignore-next-line */
-                $object->setCreatedBy($user);
+                $object->setCreatedBy($this->security->getUser());
             }
 
             $property = new PropertyAccessor();

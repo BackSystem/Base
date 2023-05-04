@@ -1,29 +1,55 @@
-import { html } from '../functions/Dom'
-import { onClick } from '../functions/Event'
+import {html} from '../functions/Dom'
+import {onClick} from '../functions/Event'
 
 onClick('.add-item[data-collection-holder-class]', function () {
-	const { collectionHolderClass } = this.dataset
+    const {collectionHolderClass} = this.dataset
 
-	const container = document.querySelector(`[data-collection="${collectionHolderClass}"]`) as HTMLElement
+    const container = document.querySelector(`[data-collection="${collectionHolderClass}"]`) as HTMLElement
 
-	if (container) {
-		const { prototype } = container.dataset
-		let { index } = container.dataset
+    if (container) {
+        const {prototype} = container.dataset
 
-		const data = html(prototype.replace(/__name__/g, index))
+        let index = parseInt(container.dataset.index)
 
-		container.appendChild(data)
+        const data = html(prototype.replace(/__name__/g, index.toString()))
 
-		index += 1
+        container.appendChild(data)
 
-		container.dataset.index = index
-	}
+        index += 1
+
+        container.dataset.index = index.toString()
+
+        const inputFile = data.querySelector('input[type="file"]') as HTMLInputElement
+
+        if (inputFile) {
+            data.classList.add('visually-hidden')
+
+            const filename = data.querySelector('.filename') as HTMLSpanElement
+            const filesize = data.querySelector('.filesize') as HTMLSpanElement
+
+            inputFile.addEventListener('change', () => {
+                const file = inputFile.files[0]
+
+                if (filename) {
+                    filename.innerText = file.name
+                }
+
+                if (filesize) {
+                    filesize.innerText = file.size.sizeFormat()
+                }
+
+                data.classList.remove('visually-hidden')
+            })
+
+            inputFile.click()
+        }
+    }
 })
 
 onClick('.delete-item', function () {
-	const item = this.closest('.item')
+    const item = this.closest('.item')
 
-	if (item) {
-		item.remove()
-	}
+    if (item) {
+        item.remove()
+    }
 })
