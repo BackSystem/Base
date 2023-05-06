@@ -5,7 +5,7 @@
 		{%- set attr = attr | merge({ class: ((attr.class | default('')) ~ ' is-invalid') }) -%}
 	{%- endif -%}
 
-	{%- if type is not defined or type != 'hidden' -%}
+	{%- if type is not defined or (type != 'hidden' and type != 'file') -%}
 		{%- set attr = attr | merge({ autocomplete: (attr.autocomplete | default('off')) | trim, placeholder: (attr.placeholder | default(label) | default(name | humanize)) | trim }) -%}
 	{%- endif -%}
 

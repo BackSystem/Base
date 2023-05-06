@@ -30,7 +30,7 @@ class ForeignKeysSubscriber implements EventSubscriberInterface
 
             if ($schema) {
                 // Todo: Improve this
-                if ($_ENV['APP_ENV'] === 'test') {
+                if ('test' === $_ENV['APP_ENV']) {
                     $schema .= '_test';
                 }
 
@@ -56,7 +56,7 @@ class ForeignKeysSubscriber implements EventSubscriberInterface
             $schemaName = $metaData->getSchemaName();
 
             // Todo: Improve this
-            if ($_ENV['APP_ENV'] === 'test') {
+            if ('test' === $_ENV['APP_ENV']) {
                 $schemaName .= '_test';
             }
 
@@ -87,7 +87,7 @@ class ForeignKeysSubscriber implements EventSubscriberInterface
                             $options['onDelete'] = $inverseColumn['onDelete'];
                         }
 
-                        $foreignTable = $targetSchemaName . '.' . $targetMetaData->getTableName();
+                        $foreignTable = $targetSchemaName.'.'.$targetMetaData->getTableName();
 
                         // Add the foreign key
                         $schema->getTable($mapping['joinTable']['name'])
@@ -106,7 +106,7 @@ class ForeignKeysSubscriber implements EventSubscriberInterface
                             $options['onDelete'] = $joinColumn['onDelete'];
                         }
 
-                        $foreignTable = $targetSchemaName . '.' . $targetMetaData->getTableName();
+                        $foreignTable = $targetSchemaName.'.'.$targetMetaData->getTableName();
 
                         // Add the foreign key
                         $schema->getTable($metaData->getTableName())

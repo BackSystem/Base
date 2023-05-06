@@ -64,3 +64,6 @@ services:
     BackSystem\Base\Twig\TimeExtension:
         tags: [ 'twig.extension' ]
         arguments: [ '@translator' ]
+
+    BackSystem\Base\Twig\SizeExtension:
+        tags: [ 'twig.extension' ]
