@@ -52,7 +52,7 @@ final class OneAttributePerLineFixer extends AbstractFixer implements Whitespace
             if ('#[' === $token?->getContent()) {
                 $endTokenIndex = $this->getAttributeEndTokenIndex($tokens, $index);
 
-                if (']' !== $tokens[$index - 2]->getContent()) {
+                if (']' !== $tokens[$index - 2]->getContent() && !$tokens[$index - 2]->isComment()) {
                     $count = substr_count($tokens[$index - 1]->getContent(), "\n");
 
                     if ($count < 2) {

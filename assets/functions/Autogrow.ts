@@ -1,68 +1,67 @@
-const debounce = (callback, delay) => {
-	let timer
-
-	return function () {
-		let args = arguments
-		let context = this
-
-		clearTimeout(timer)
-
-		timer = setTimeout(() => {
-			callback.apply(context, args)
-		}, delay)
-	}
-}
-
 export class Autogrow {
 
-	private element: HTMLTextAreaElement
+    private element: HTMLTextAreaElement
 
-	constructor(element: HTMLTextAreaElement) {
-		this.element = element
+    constructor(element: HTMLTextAreaElement) {
+        this.element = element
 
-		this.onFocus = this.onFocus.bind(this)
-		this.onFocusOut = this.onFocusOut.bind(this)
-		this.autogrow = this.autogrow.bind(this)
-		this.onResize = debounce(this.onResize.bind(this), 300)
+        this.onFocus = this.onFocus.bind(this)
+        this.onFocusOut = this.onFocusOut.bind(this)
+        this.autogrow = this.autogrow.bind(this)
+        this.onResize = this.debounce(this.onResize.bind(this), 300)
 
-		this.element.addEventListener('focusout', this.onFocusOut)
+        this.element.addEventListener('focusout', this.onFocusOut)
 
-		this.onFocus()
-	}
+        this.onFocus()
+    }
 
-	onFocus() {
-		// console.log('onFocus')
+    debounce(callback: Function, delay: number) {
+        let timer: NodeJS.Timeout
 
-		this.element.style.overflow = 'hidden'
-		this.element.style.resize = 'none'
-		this.element.style.boxSizing = 'border-box'
+        return function () {
+            let args = arguments
+            let context = this
 
-		this.autogrow()
+            clearTimeout(timer)
 
-		window.addEventListener('resize', this.onResize)
+            timer = setTimeout(() => {
+                callback.apply(context, args)
+            }, delay)
+        }
+    }
 
-		this.element.addEventListener('input', this.autogrow)
-	}
+    onFocus() {
+        // console.log('onFocus')
 
-	onFocusOut() {
-		// console.log('onFocusOut')
+        this.element.style.overflow = 'hidden'
+        this.element.style.resize = 'none'
+        this.element.style.boxSizing = 'border-box'
 
-		this.element.value = this.element.value.trim()
-		this.autogrow()
-	}
+        this.autogrow()
 
-	onResize() {
-		// console.log('onResize')
+        window.addEventListener('resize', this.onResize)
 
-		this.autogrow()
-	}
+        this.element.addEventListener('input', this.autogrow)
+    }
 
-	autogrow() {
-		// console.log('Grow')
+    onFocusOut() {
+        // console.log('onFocusOut')
 
-		this.element.style.height = 'auto'
-		this.element.style.height = this.element.scrollHeight + 'px'
+        this.element.value = this.element.value.trim()
+        this.autogrow()
+    }
 
-	}
+    onResize() {
+        // console.log('onResize')
+
+        this.autogrow()
+    }
+
+    autogrow() {
+        // console.log('Grow')
+
+        this.element.style.height = 'auto'
+        this.element.style.height = this.element.scrollHeight + 'px'
+    }
 
 }

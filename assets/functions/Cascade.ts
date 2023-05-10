@@ -30,13 +30,16 @@ export default class Cascade {
                         children.forEach(childName => {
                             const child = form.querySelector('select[name="' + childName + '"]') as HTMLSelectElement
 
-                            child.disabled = true
+                            if (child) {
+                                child.disabled = true
+                            }
                         })
 
                         const method = form.method ?? 'post'
                         const body = new FormData(form)
 
                         let action = form.getAttribute('action') ?? window.location.origin + window.location.pathname
+                        let init = { method }
 
                         if (method === 'get') {
                             const searchParams = new URLSearchParams()
@@ -52,14 +55,12 @@ export default class Cascade {
                             }
 
                             window.history.replaceState({}, null, action)
+                        } else {
+                            init['body'] = body
                         }
 
-                        fetch(action, {
-                            method,
-                        }).then(response => response.text()).then(data => {
+                        fetch(action, init).then(response => response.text()).then(data => {
                             const body = new DOMParser().parseFromString(data, 'text/html').body
-
-                            this.replaceElement(body, name)
 
                             children.forEach(childName => {
                                 this.replaceElement(body, childName)
@@ -71,7 +72,7 @@ export default class Cascade {
         })
     }
 
-    private getChildrenToDisable(fields, name) {
+    private getChildrenToDisable(fields: Fields, name: string) {
         let array = []
 
         if (fields.hasOwnProperty(name)) {
@@ -93,7 +94,7 @@ export default class Cascade {
         return array
     }
 
-    private replaceElement(body, name) {
+    private replaceElement(body: HTMLElement, name: string) {
         const select = document.querySelector('select[name="' + name + '"]')
 
         if (select) {

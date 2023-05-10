@@ -1,13 +1,13 @@
-import {html} from '../functions/Dom'
-import {onClick} from '../functions/Event'
+import { html } from '../functions/Dom'
+import { onClick } from '../functions/Event'
 
 onClick('.add-item[data-collection-holder-class]', function () {
-    const {collectionHolderClass} = this.dataset
+    const { collectionHolderClass } = this.dataset
 
     const container = document.querySelector(`[data-collection="${collectionHolderClass}"]`) as HTMLElement
 
     if (container) {
-        const {prototype} = container.dataset
+        const { prototype } = container.dataset
 
         let index = parseInt(container.dataset.index)
 
