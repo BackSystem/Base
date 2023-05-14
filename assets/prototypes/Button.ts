@@ -4,7 +4,7 @@ export {}
 
 declare global {
     interface HTMLElement {
-        setLoading(enable: boolean)
+        setLoading(enable: boolean): void
     }
 }
 

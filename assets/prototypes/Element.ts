@@ -2,7 +2,7 @@ export {}
 
 declare global {
     interface Element {
-        wrapAll(nodes)
+        wrapAll(nodes): Element
     }
 }
 

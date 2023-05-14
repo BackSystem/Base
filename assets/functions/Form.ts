@@ -1,5 +1,5 @@
 import { Modal } from 'bootstrap'
-import displayToast, { ToastType } from './ToastColor'
+import displayToast, { ToastType } from "@Base/functions/ToastColor";
 
 type Parameters = {
 	requiredMessage?: string,
@@ -60,7 +60,7 @@ class Form {
 	constructor(form: HTMLFormElement) {
 		this.form = form
 
-		this.setFields()
+		this.button = this.form.querySelector('button[type="submit"]')
 	}
 
 	public enableDynamic(delay: number = 500): Form {
@@ -130,27 +130,21 @@ class Form {
 	}
 
 	public displayError(fieldName: string, errorMessage: string): Form {
-		if (this.fields.has(fieldName)) {
-			const field = this.fields.get(fieldName)
+		const field = this.form.querySelector('[name="' + fieldName + '"]')
 
-			if (!this.invalidFeedbacks.has(field)) {
-				const nextElement = field.nextElementSibling
+		if (field) {
+			const nextElement = field.nextElementSibling
+			let invalidFeedback
 
-				console.log(errorMessage, field, nextElement)
+			if (nextElement?.classList.contains('invalid-feedback')) {
+				invalidFeedback = nextElement
+			} else {
+				invalidFeedback = document.createElement('div')
+				invalidFeedback.classList.add('invalid-feedback')
 
-				if (nextElement?.classList.contains('invalid-feedback')) {
-					this.invalidFeedbacks.set(field, nextElement)
-				} else {
-					const div = document.createElement('div')
-					div.classList.add('invalid-feedback')
-
-					field.insertAdjacentElement('afterend', div)
-
-					this.invalidFeedbacks.set(field, div)
-				}
+				field.insertAdjacentElement('afterend', invalidFeedback)
 			}
 
-			const invalidFeedback = this.invalidFeedbacks.get(field)
 			invalidFeedback.innerHTML = errorMessage
 
 			field.classList.add('is-invalid')
@@ -237,7 +231,11 @@ class Form {
 		this.form.addEventListener('submit', event => {
 			event.preventDefault()
 
-			this.fields.forEach((field) => field.classList.remove('is-invalid'))
+			const fields = this.getFields()
+
+			fields.forEach((field: HTMLInputElement) => {
+				field.classList.remove('is-invalid')
+			})
 
 			if (this.validation && this.checkFields()) {
 				return
@@ -245,10 +243,11 @@ class Form {
 
 			this.setLoading(true)
 
-			const body = new FormData(this.form)
+			const body = this.form.serialize()
 
-			// Trim spaces and more than one space in values
-			body.forEach((value, key) => body.set(key, value.toString().replace(/\s\s+/g, ' ').trim()))
+			body.forEach((value, key) => {
+				console.log(key, value)
+			})
 
 			let action = this.form.getAttribute('action') ?? window.location.origin + window.location.pathname
 			const { method } = this.form
@@ -295,7 +294,13 @@ class Form {
 				window.history.replaceState({}, null, action)
 			}
 
-			fetch(action, init).then(response => response.json()).then(data => {
+			fetch(action, init).then(response => {
+				if (response.redirected) {
+					window.location.href = response.url
+				}
+
+				return response.json()
+			}).then(data => {
 				if (data.errors) {
 					Object.keys(data.errors).forEach((name) => {
 						this.displayError(name, data.errors[name])
@@ -414,7 +419,7 @@ class Form {
 	}
 
 	private checkFields(): boolean {
-		const fields = [].slice.call(this.form.querySelectorAll('input, select, textarea')) as HTMLInputElement[] | HTMLSelectElement[] | HTMLTextAreaElement[]
+		const fields = this.getFields()
 		const checks = ['checkRequired', 'checkMinTime', 'checkMaxTime', 'checkMinLength', 'checkMaxLength']
 
 		let formHasError = false
@@ -442,15 +447,8 @@ class Form {
 		return formHasError;
 	}
 
-	private setFields() {
-		this.form.querySelectorAll('input:not([type="hidden"]), select, textarea').forEach((field: HTMLInputElement) => {
-			const fieldName = field.name
-			const subName = fieldName.substring(fieldName.indexOf('[') + 1, fieldName.lastIndexOf(']'))
-
-			this.fields.set(subName !== '' ? subName : fieldName, field)
-		});
-
-		this.button = this.form.querySelector('button[type="submit"]')
+	private getFields(): (HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement)[] {
+		return Array.from(this.form.querySelectorAll('input[name], textarea[name], select[name]'))
 	}
 
 }

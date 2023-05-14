@@ -1,5 +1,6 @@
 import './modules/collections'
 import './modules/selects'
+import './modules/toasts'
 import './modules/tooltips'
 
 import './prototypes/Button'

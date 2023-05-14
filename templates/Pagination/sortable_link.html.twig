@@ -1,0 +1,14 @@
+{% set options = options | filter((v, k) => k != 'title') | merge({class: 'd-flex justify-content-between link-dark text-decoration-none p-2 ' ~ options.class}) %}
+
+<a{% for attr, value  in options %} {{ attr }}="{{ value }}"{% endfor %}>
+<span>{{ title }}</span>
+{% if sorted %}
+    <span class="ms-3">
+            {% if direction == 'desc' %}
+                <i class="fa-solid fa-sort-down"></i>
+            {% else %}
+                <i class="fa-solid fa-sort-up"></i>
+            {% endif %}
+        </span>
+{% endif %}
+</a>
