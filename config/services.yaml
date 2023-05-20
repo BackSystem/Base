@@ -31,17 +31,17 @@ services:
         tags: [ 'messenger.message_handler' ]
         arguments: [ '@service_container' ]
 
-    failed_job_service:
-        class: 'BackSystem\Base\Queue\Service\FailedJobService'
+    failed_task_service:
+        class: 'BackSystem\Base\Queue\Service\FailedTaskService'
         arguments: [ '@messenger.transport.failed', '@messenger.default_bus' ]
 
-    BackSystem\Base\Queue\Service\FailedJobService: '@failed_job_service'
+    BackSystem\Base\Queue\Service\FailedTaskService: '@failed_task_service'
 
-    scheduled_job_service:
-        class: 'BackSystem\Base\Queue\Service\ScheduledJobService'
+    scheduled_task_service:
+        class: 'BackSystem\Base\Queue\Service\ScheduledTaskService'
         arguments: [ '@doctrine.orm.entity_manager', '@messenger.default_serializer' ]
 
-    BackSystem\Base\Queue\Service\ScheduledJobService: '@scheduled_job_service'
+    BackSystem\Base\Queue\Service\ScheduledTaskService: '@scheduled_task_service'
 
     enqueue_method:
         class: 'BackSystem\Base\Queue\EnqueueMethod'

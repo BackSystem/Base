@@ -2,14 +2,14 @@
 
 namespace BackSystem\Base\Queue\Service;
 
-use BackSystem\Base\Queue\FailedJob;
+use BackSystem\Base\Queue\FailedTask;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Transport\Receiver\ListableReceiverInterface;
 use Symfony\Component\Messenger\Transport\Sync\SyncTransport;
 use Symfony\Component\Messenger\Transport\TransportInterface;
 
-class FailedJobService
+class FailedTaskService
 {
     private readonly ListableReceiverInterface $receiver;
 
@@ -23,9 +23,9 @@ class FailedJobService
     }
 
     /**
-     * @return FailedJob[]
+     * @return FailedTask[]
      */
-    public function getJobs(): array
+    public function getTasks(): array
     {
         if ($this->receiver instanceof SyncTransport) {
             return [];
@@ -37,24 +37,24 @@ class FailedJobService
             $envelopes = iterator_to_array($envelopes);
         }
 
-        return array_map(static fn (Envelope $envelope) => new FailedJob($envelope), $envelopes);
+        return array_map(static fn (Envelope $envelope) => new FailedTask($envelope), $envelopes);
     }
 
-    public function retryJob(int $jobId): void
+    public function retryTask(int $taskId): void
     {
-        $envelope = $this->receiver->find($jobId);
+        $envelope = $this->receiver->find($taskId);
 
         if ($envelope instanceof Envelope) {
             $this->messageBus->dispatch($envelope->getMessage());
             $this->receiver->reject($envelope);
         } else {
-            throw new \RuntimeException(sprintf('Unable to find the job #%d.', $jobId));
+            throw new \RuntimeException(sprintf('Unable to find the task #%d.', $taskId));
         }
     }
 
-    public function deleteJob(int $jobId): void
+    public function deleteTask(int $taskId): void
     {
-        $envelope = $this->receiver->find($jobId);
+        $envelope = $this->receiver->find($taskId);
 
         if ($envelope instanceof Envelope) {
             $this->receiver->reject($envelope);

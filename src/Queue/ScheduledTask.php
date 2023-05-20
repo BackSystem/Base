@@ -6,7 +6,7 @@ use BackSystem\Base\Queue\Message\ServiceMethodMessage;
 use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Stamp\DelayStamp;
 
-class ScheduledJob
+class ScheduledTask
 {
     public function __construct(private readonly Envelope $envelope, private readonly int $id, private readonly \DateTimeImmutable $createdAt)
     {

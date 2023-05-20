@@ -3,10 +3,8 @@
 namespace BackSystem\Base\Queue\Handler;
 
 use BackSystem\Base\Queue\Message\ServiceMethodMessage;
-use Psr\Container\ContainerInterface;
-use Symfony\Component\Messenger\Attribute\AsMessageHandler;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 
-#[AsMessageHandler]
 class ServiceMethodMessageHandler
 {
     public function __construct(private readonly ContainerInterface $container)
@@ -15,8 +13,6 @@ class ServiceMethodMessageHandler
 
     public function __invoke(ServiceMethodMessage $message): void
     {
-        dump($message);
-
         /** @var callable $callable */
         $callable = [
             $this->container->get($message->getServiceName()),

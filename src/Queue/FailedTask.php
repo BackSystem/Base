@@ -7,7 +7,7 @@ use Symfony\Component\Messenger\Envelope;
 use Symfony\Component\Messenger\Stamp\ErrorDetailsStamp;
 use Symfony\Component\Messenger\Stamp\RedeliveryStamp;
 
-class FailedJob
+class FailedTask
 {
     private readonly string $id;
 
