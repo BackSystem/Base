@@ -25,6 +25,8 @@ HTMLFormElement.prototype.serialize = function () {
                 const file = field.files[0]
 
                 body.append(name, file)
+            } else if (field instanceof HTMLInputElement && field.type === 'checkbox') {
+                body.set(name, field.checked ? '1' : '0')
             } else {
                 const value = field.value.toString().replace(/\s\s+/g, ' ').trim()
 
