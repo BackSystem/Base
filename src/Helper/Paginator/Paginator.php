@@ -13,7 +13,7 @@ class Paginator implements PaginatorInterface
     }
 
     /** @phpstan-ignore-next-line */
-    public function paginate(mixed $query): PaginationInterface
+    public function paginate(mixed $query, ?int $limit = null): PaginationInterface
     {
         $request = $this->requestStack->getCurrentRequest();
         $page = $request ? $request->query->getInt('page', 1) : 1;
@@ -22,7 +22,15 @@ class Paginator implements PaginatorInterface
             throw new PageOutOfBoundException();
         }
 
-        $pagination = $this->paginator->paginate($query, $page, $query instanceof Query && null !== $query->getMaxResults() ? $query->getMaxResults() : 10, [
+        if ($query instanceof Query && null !== $query->getMaxResults()) {
+            $limit = $query->getMaxResults();
+        }
+
+        if (-1 === $limit) {
+            $limit = PHP_INT_MAX;
+        }
+
+        $pagination = $this->paginator->paginate($query, $page, $limit ?? 10, [
             'sortFieldWhitelist' => [],
             'filterFieldWhitelist' => [],
         ]);
