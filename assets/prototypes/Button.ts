@@ -22,14 +22,12 @@ HTMLElement.prototype.setLoading = function (enable: boolean = true) {
         span.classList.add('visually-hidden')
         span.wrapAll(this.childNodes)
 
-        const spinner = document.createElement('span')
-        spinner.ariaHidden = 'true'
-        spinner.classList.add('spinner-border')
-        spinner.classList.add('spinner-border-sm')
+        const icon = document.createElement('i')
+        icon.classList.add('fa-duotone', 'fa-fw', 'fa-spinner-third', 'fa-spin')
 
-        buttons.set(this, [span, spinner])
+        buttons.set(this, [span, icon])
 
-        this.appendChild(spinner)
+        this.appendChild(icon)
     }
 
     const items = buttons.get(this)
