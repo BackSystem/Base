@@ -2,27 +2,52 @@ import { onClick } from './Event'
 import { html } from './Dom'
 
 const setPagination = (selector: string) => {
-	onClick(selector + ' a.page-link', event => {
-		event.preventDefault()
+    onClick(selector + ' a.page-link', event => {
+        event.preventDefault()
 
-		const target = event.target as HTMLLinkElement
+        const target = event.target as HTMLLinkElement
 
-		const url = target.href
+        const url = new URL(target.href)
 
-		document.querySelectorAll(selector + ' .page-item').forEach(pageLink => {
-			pageLink.classList.add('disabled')
-		});
+        if (url.searchParams.has('page') && url.searchParams.get('page') === '1') {
+            url.searchParams.delete('page')
+        }
 
-		(document.activeElement as HTMLElement).blur()
+        const pageLinks = document.querySelectorAll(selector + ':not(:disabled) .page-item')
 
-		fetch(url).then(response => response.text()).then(data => {
-			const body = html(data)
+        pageLinks.forEach(pageLink => pageLink.classList.add('disabled'));
 
-			document.querySelector(selector).replaceWith(body.querySelector(selector))
+        (document.activeElement as HTMLElement).blur()
 
-			window.history.pushState(null, null, url)
-		})
-	})
+        fetch(url.href).then(response => response.text()).then(data => {
+            const response = html(data)
+
+            const responsePageLinks = response.querySelectorAll(selector + ':not(:disabled) .page-item')
+
+            responsePageLinks.forEach(pageLink => pageLink.classList.add('disabled'))
+
+            if (!(response instanceof HTMLElement)) {
+                throw new Error()
+            }
+
+            const responseSelector = response.querySelector(selector)
+            const existingSelector = document.querySelector(selector)
+
+            if (!responseSelector || !existingSelector) {
+                throw new Error()
+            }
+
+            existingSelector.replaceWith(responseSelector)
+
+            setTimeout(() => {
+                responsePageLinks.forEach(pageLink => pageLink.classList.remove('disabled'))
+            }, 10)
+
+            window.history.pushState(null, null, url)
+        }).catch(() => {
+            pageLinks.forEach(pageLink => pageLink.classList.remove('disabled'))
+        })
+    })
 }
 
 export { setPagination }
