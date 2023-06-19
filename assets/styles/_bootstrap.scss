@@ -84,5 +84,5 @@ $theme-colors: map-merge($theme-colors, (
 @import '~bootstrap/scss/utilities/api';
 
 // Custom
-@import '_table.scss';
-@import '_breadcrumb.scss';
+@import 'tables.scss';
+@import 'breadcrumb.scss';

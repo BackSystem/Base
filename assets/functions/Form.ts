@@ -1,455 +1,263 @@
-import { Modal } from 'bootstrap'
-import displayToast, { ToastType } from "@Base/functions/ToastColor";
+import displayToast, { ToastType } from '@Base/functions/ToastColor'
 
 type Parameters = {
-	requiredMessage?: string,
-	minLengthMessage?: string,
-	maxLengthMessage?: string,
-	minTimeMessage?: string,
-	maxTimeMessage?: string
-};
+    enableButtonAfterSuccess?: boolean,
+}
 
 class Form {
 
-	private static instances = new Map()
+    private static instances = new Map()
 
-	private readonly form: HTMLFormElement
-	private button: HTMLButtonElement
-	private buttonText: HTMLSpanElement
-	private buttonSpinner: HTMLSpanElement
+    private readonly form: HTMLFormElement
+    private button: HTMLButtonElement
+    private buttonText: HTMLSpanElement
+    private buttonSpinner: HTMLSpanElement
 
-	private fields = new Map()
-	private invalidFeedbacks = new Map()
+    private fields = new Map()
+    private invalidFeedbacks = new Map()
 
-	private validation: boolean = false
-	private reset: boolean = true
+    private validation: boolean = false
+    private reset: boolean = true
 
-	private dynamicDelay: NodeJS.Timeout = null
+    private dynamicDelay: NodeJS.Timeout = null
 
-	private static deleteModal
-	private static deleteForm
+    private controller = null
 
-	private controller = null
+    private static defaults: Parameters = {
+        enableButtonAfterSuccess: true,
+    }
 
-	private static deleteForms = new Map()
+    private parameters: Parameters = {}
 
-	private static defaults: Parameters = {
-		requiredMessage: 'Veuillez renseigner ce champ.',
-		minLengthMessage: 'Please lengthen this text to contain at least {0} characters.',
-		maxLengthMessage: 'Please lengthen this text to contain at most {0} characters.',
-		minTimeMessage: 'L\'heure doit être égale ou postérieure à {0}.',
-		maxTimeMessage: 'L\'heure doit être égale ou antérieure à {0}.',
-	}
+    static get(form: HTMLFormElement): Form {
+        if (!form) {
+            return
+        }
 
-	static get(form: HTMLFormElement): Form {
-		if (!form) {
-			return
-		}
+        if (!Form.instances.has(form)) {
+            Form.instances.set(form, new Form(form))
+        }
 
-		if (!Form.instances.has(form)) {
-			Form.instances.set(form, new Form(form))
-		}
+        return Form.instances.get(form)
+    }
 
-		return Form.instances.get(form)
-	}
+    static setDefaults(parameters: Parameters) {
+        Form.defaults = {...Form.defaults, ...parameters}
+    }
 
-	static setDefaults(parameters: Parameters) {
-		Form.defaults = { ...Form.defaults, ...parameters }
-	}
+    constructor(form: HTMLFormElement) {
+        this.form = form
 
-	constructor(form: HTMLFormElement) {
-		this.form = form
+        this.parameters = Form.defaults
 
-		this.button = this.form.querySelector('button[type="submit"]')
-	}
+        this.button = this.form.querySelector('button[type="submit"]')
+    }
 
-	public enableDynamic(delay: number = 500): Form {
-		this.fields.forEach((field) => {
-			const event = field instanceof HTMLInputElement ? 'input' : 'change'
+    public setConfiguration(parameters: Parameters): Form {
+        this.parameters = {...Form.defaults, ...parameters}
 
-			field.addEventListener(event, () => {
-				if (this.dynamicDelay) {
-					clearTimeout(this.dynamicDelay)
-				}
+        return this
+    }
 
-				this.setLoading(true)
+    public enableDynamic(delay: number = 500): Form {
+        this.fields.forEach((field) => {
+            const event = field instanceof HTMLInputElement ? 'input' : 'change'
 
-				this.dynamicDelay = setTimeout(() => {
-					this.form.dispatchEvent(new Event('submit'))
+            field.addEventListener(event, () => {
+                if (this.dynamicDelay) {
+                    clearTimeout(this.dynamicDelay)
+                }
 
-					this.dynamicDelay = null
-				}, delay)
-			})
-		})
+                this.setLoading(true)
 
-		return this
-	}
+                this.dynamicDelay = setTimeout(() => {
+                    this.form.dispatchEvent(new Event('submit'))
 
-	public setLoading(isLoading: boolean): Form {
-		if (!this.buttonText && !this.buttonSpinner) {
-			const inner = this.button.innerHTML
+                    this.dynamicDelay = null
+                }, delay)
+            })
+        })
 
-			this.button.innerHTML = ''
+        return this
+    }
 
-			this.buttonText = document.createElement('span')
-			this.buttonText.innerHTML = inner
+    public setLoading(isLoading: boolean): Form {
+        if (!this.buttonText && !this.buttonSpinner) {
+            const inner = this.button.innerHTML
 
-			this.buttonSpinner = document.createElement('span')
-			this.buttonSpinner.classList.add('spinner-border', 'spinner-border-sm', 'd-none')
+            this.button.innerHTML = ''
 
-			const buttonSpinnerText = document.createElement('span')
-			buttonSpinnerText.classList.add('visually-hidden')
-			buttonSpinnerText.innerText = 'Loading...'
+            this.buttonText = document.createElement('span')
+            this.buttonText.innerHTML = inner
 
-			this.buttonSpinner.appendChild(buttonSpinnerText)
-			this.button.appendChild(this.buttonText)
-			this.button.appendChild(this.buttonSpinner)
-		}
+            this.buttonSpinner = document.createElement('i')
+            this.buttonSpinner.classList.add('fa-duotone', 'fa-fw', 'fa-spinner-third', 'fa-spin', 'd-none')
 
-		if (isLoading) {
-			this.button.disabled = true
+            this.button.appendChild(this.buttonText)
+            this.button.appendChild(this.buttonSpinner)
+        }
 
-			this.buttonText.classList.add('d-none')
-			this.buttonSpinner.classList.remove('d-none')
-		} else {
-			this.button.disabled = false
+        if (isLoading) {
+            this.button.disabled = true
 
-			this.buttonSpinner.classList.add('d-none')
-			this.buttonText.classList.remove('d-none')
-		}
+            this.buttonText.classList.add('d-none')
+            this.buttonSpinner.classList.remove('d-none')
+        } else {
+            this.button.disabled = false
 
-		return this
-	}
+            this.buttonSpinner.classList.add('d-none')
+            this.buttonText.classList.remove('d-none')
+        }
 
-	public hideErrors(): Form {
-		this.invalidFeedbacks.forEach((invalidFeedback, field) => {
-			field.classList.remove('is-invalid')
-		})
+        return this
+    }
 
-		return this
-	}
+    public hideErrors(): Form {
+        this.invalidFeedbacks.forEach((invalidFeedback, field) => {
+            field.classList.remove('is-invalid')
+        })
 
-	public displayError(fieldName: string, errorMessage: string): Form {
-		const field = this.form.querySelector('[name="' + fieldName + '"]')
+        return this
+    }
+
+    public displayError(fieldName: string, errorMessage: string): Form {
+        const field = this.form.querySelector('[name="' + fieldName + '"]')
 
-		if (field) {
-			const nextElement = field.nextElementSibling
-			let invalidFeedback
+        if (field) {
+            const nextElement = field.nextElementSibling
+            let invalidFeedback
 
-			if (nextElement?.classList.contains('invalid-feedback')) {
-				invalidFeedback = nextElement
-			} else {
-				invalidFeedback = document.createElement('div')
-				invalidFeedback.classList.add('invalid-feedback')
-
-				field.insertAdjacentElement('afterend', invalidFeedback)
-			}
-
-			invalidFeedback.innerHTML = errorMessage
-
-			field.classList.add('is-invalid')
-		}
-
-		return this
-	}
-
-	public enableDelete(callback: Function = null): Form {
-		if (Form.deleteForms.size === 0) {
-			const modalElement = document.querySelector('.modal-delete')
-
-			if (!modalElement) {
-				console.error('Modal element does not exists.')
-
-				return this
-			}
-
-			Form.deleteModal = new Modal(modalElement)
-
-			const button = modalElement.querySelector('.btn-danger') as HTMLButtonElement
-
-			button.addEventListener('click', () => {
-				const form = Form.deleteForm
-				const body = new FormData(form)
-				button.disabled = true
-
-				fetch(form.getAttribute('action') ?? window.location.href, {
-					method: 'POST',
-					body,
-					headers: {
-						Fetch: 'true',
-					},
-				}).then((response) => response.json()).then((data) => {
-					if (data.success) {
-						Form.deleteModal.hide()
-
-						displayToast(ToastType.Success, data.message)
-
-						const successCallback = Form.deleteForms.get(form)
-
-						if (successCallback) {
-							successCallback(data)
-						}
-					}
-					button.disabled = false
-				})
-			})
-		}
-
-		this.button.addEventListener('click', event => {
-			event.preventDefault()
-
-			Form.deleteForm = this.form
-			Form.deleteModal.show()
-		})
-
-		Form.deleteForms.set(this.form, callback)
-
-		return this
-	}
-
-	public enableValidation(): Form {
-		this.form.noValidate = true
-		this.validation = true
-
-		return this
-	}
-
-	public disableValidation(): Form {
-		this.form.noValidate = false
-		this.validation = false
-
-		return this
-	}
-
-	public disableReset(): Form {
-		this.reset = false
-
-		return this
-	}
-
-	public enableFetch(successCallback: Function = null, errorCallback: Function = null): Form {
-		this.form.addEventListener('submit', event => {
-			event.preventDefault()
-
-			const fields = this.getFields()
-
-			fields.forEach((field: HTMLInputElement) => {
-				field.classList.remove('is-invalid')
-			})
-
-			if (this.validation && this.checkFields()) {
-				return
-			}
-
-			this.setLoading(true)
-
-			const body = this.form.serialize()
-
-			body.forEach((value, key) => {
-				console.log(key, value)
-			})
-
-			let action = this.form.getAttribute('action') ?? window.location.origin + window.location.pathname
-			const { method } = this.form
-
-			if (this.controller) {
-				this.controller.abort()
-			}
-
-			this.controller = new AbortController()
-			const { signal } = this.controller
-
-			let init: {
-				method: string,
-				headers: {
-					Fetch: string
-				},
-				signal: AbortSignal,
-				body?: FormData,
-			} = {
-				method,
-				headers: {
-					Fetch: 'true',
-				},
-				signal,
-			};
-
-			if (method === 'post') {
-				init = { ...init, body }
-			}
-
-			if (method === 'get') {
-				const searchParams = new URLSearchParams()
-
-				body.forEach((value: string, key) => {
-					if (value.length > 0) {
-						searchParams.append(key, value.toString())
-					}
-				})
-
-				if (searchParams.toString().length > 0) {
-					action += `?${searchParams.toString()}`
-				}
-
-				window.history.replaceState({}, null, action)
-			}
-
-			fetch(action, init).then(response => {
-				if (response.redirected) {
-					window.location.href = response.url
-				}
-
-				return response.json()
-			}).then(data => {
-				if (data.errors) {
-					Object.keys(data.errors).forEach((name) => {
-						this.displayError(name, data.errors[name])
-					})
-				}
-
-				if (data.success && this.reset) {
-					this.form.reset()
-				}
-
-				if (data.message) {
-					displayToast(data.success ? ToastType.Success : ToastType.Error, data.message)
-				}
-
-				this.setLoading(false)
-
-				if (data.success && successCallback) {
-					successCallback(data)
-				}
-
-				if (!data.success && errorCallback) {
-					errorCallback(data)
-				}
-
-				this.controller = null
-			}).catch((error) => {
-				if (error.name !== 'AbortError') {
-					this.setLoading(false)
-
-					// throw new error
-				}
-			});
-		});
-
-		return this
-	}
-
-	private checkRequired(field: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement): boolean {
-		if (field.required && field.value.length === 0) {
-			this.displayError(field.name, Form.defaults.requiredMessage)
-
-			return true
-		}
-
-		return false
-	}
-
-	private checkMinTime(field: HTMLInputElement): boolean {
-		if (field.min) {
-			const min = field.min ? parseInt(field.min.toString().replace(':', '')) : null
-			const value = field.value ? parseInt(field.value.toString().replace(':', '')) : null
-
-			console.log('MinTime', field.name, value, min)
-
-			if (value < min) {
-				this.displayError(field.name, Form.defaults.minTimeMessage.replace('{0}', field.min.toString()))
-
-				return true
-			}
-		}
-
-		return false
-	}
-
-	private checkMaxTime(field: HTMLInputElement): boolean {
-		if (field.max) {
-			const max = field.max ? parseInt(field.max.toString().replace(':', '')) : null
-			const value = field.value ? parseInt(field.value.toString().replace(':', '')) : null
-
-			console.log('MaxTime', field.name, value, max)
-
-			if (value > max) {
-				this.displayError(field.name, Form.defaults.maxTimeMessage.replace('{0}', field.max.toString()))
-
-				return true
-			}
-		}
-
-		return false
-	}
-
-	private checkMinLength(field: HTMLInputElement | HTMLTextAreaElement): boolean {
-		const minLength = field.minLength
-		const length = field.value.length
-
-		if (minLength > -1 && length > 0) {
-
-			console.log('MinLength', field.name, length, minLength)
-
-			if (minLength > length) {
-				this.displayError(field.name, Form.defaults.minLengthMessage.replace('{0}', minLength.toString()))
-
-				return true
-			}
-		}
-
-		return false
-	}
-
-	private checkMaxLength(field: HTMLInputElement | HTMLTextAreaElement): boolean {
-		const maxLength = field.maxLength
-		const length = field.value.length
-
-		if (maxLength > -1 && length > 0) {
-
-			console.log('MaxLength', field.name, length, maxLength)
-
-			if (maxLength < length) {
-				this.displayError(field.name, Form.defaults.maxLengthMessage.replace('{0}', maxLength.toString()))
-
-				return true
-			}
-		}
-
-		return false
-	}
-
-	private checkFields(): boolean {
-		const fields = this.getFields()
-		const checks = ['checkRequired', 'checkMinTime', 'checkMaxTime', 'checkMinLength', 'checkMaxLength']
-
-		let formHasError = false
-
-		fields.forEach((field) => {
-			if (!this.fields.has(field.name)) {
-				this.fields.set(field.name, field)
-			}
-
-			let fieldHasError = false
-
-			checks.forEach((check: string) => {
-				if (fieldHasError === true) {
-					return
-				}
-
-				fieldHasError = this[check](field)
-			});
-
-			if (fieldHasError) {
-				formHasError = true
-			}
-		});
-
-		return formHasError;
-	}
-
-	private getFields(): (HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement)[] {
-		return Array.from(this.form.querySelectorAll('input[name], textarea[name], select[name]'))
-	}
+            if (nextElement?.classList.contains('invalid-feedback')) {
+                invalidFeedback = nextElement
+            } else {
+                invalidFeedback = document.createElement('div')
+                invalidFeedback.classList.add('invalid-feedback')
+
+                field.insertAdjacentElement('afterend', invalidFeedback)
+            }
+
+            invalidFeedback.innerHTML = errorMessage
+
+            field.classList.add('is-invalid')
+        }
+
+        return this
+    }
+
+    public disableReset(): Form {
+        this.reset = false
+
+        return this
+    }
+
+    public enableFetch(successCallback: Function = null, errorCallback: Function = null): Form {
+        this.form.addEventListener('submit', event => {
+            event.preventDefault()
+
+            const fields = this.getFields()
+
+            fields.forEach((field: HTMLInputElement) => {
+                field.classList.remove('is-invalid')
+            })
+
+            this.setLoading(true)
+
+            const body = this.form.serialize()
+
+            let action = this.form.getAttribute('action') ?? window.location.origin + window.location.pathname
+            const {method} = this.form
+
+            if (this.controller) {
+                this.controller.abort()
+            }
+
+            this.controller = new AbortController()
+            const {signal} = this.controller
+
+            let init: {
+                method: string,
+                headers: {
+                    Fetch: string
+                },
+                signal: AbortSignal,
+                body?: FormData,
+            } = {
+                method,
+                headers: {
+                    Fetch: 'true',
+                },
+                signal,
+            };
+
+            if (method === 'post') {
+                init = {...init, body}
+            }
+
+            if (method === 'get') {
+                const searchParams = new URLSearchParams()
+
+                body.forEach((value: string, key) => {
+                    if (value.length > 0) {
+                        searchParams.append(key, value.toString())
+                    }
+                })
+
+                if (searchParams.toString().length > 0) {
+                    action += `?${searchParams.toString()}`
+                }
+
+                window.history.replaceState({}, null, action)
+            }
+
+            fetch(action, init).then(response => {
+                if (response.redirected) {
+                    window.location.href = response.url
+                }
+
+                return response.json()
+            }).then(data => {
+                if (data.errors) {
+                    Object.keys(data.errors).forEach((name) => {
+                        this.displayError(name, data.errors[name])
+                    })
+                }
+
+                if (data.success && this.reset) {
+                    this.form.reset()
+                }
+
+                if (data.message) {
+                    displayToast(data.success ? ToastType.Success : ToastType.Error, data.message)
+                }
+
+                if (this.parameters.enableButtonAfterSuccess) {
+                    this.setLoading(false)
+                }
+
+                if (data.success && successCallback) {
+                    successCallback(data)
+                }
+
+                if (!data.success && errorCallback) {
+                    errorCallback(data)
+                }
+
+                this.controller = null
+            }).catch((error) => {
+                if (error.name !== 'AbortError') {
+                    this.setLoading(false)
+
+                    throw new error
+                }
+            })
+        })
+
+        return this
+    }
+
+    private getFields(): (HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement)[] {
+        return Array.from(this.form.querySelectorAll('input[name], textarea[name], select[name]'))
+    }
 
 }
 
