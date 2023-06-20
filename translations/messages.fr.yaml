@@ -1,16 +1,20 @@
-and: 'et'
-year: 'an'
-years: 'ans'
-month: 'mois'
-months: 'mois'
-week: 'semaine'
-weeks: 'semaines'
-hour: 'heure'
-hours: 'heures'
-minute: 'minute'
-minutes: 'minutes'
-second: 'seconde'
-seconds: 'secondes'
-
 '%time% ago': 'il y a %time%'
 'in %time%': 'dans %time%'
+Add: Ajouter
+and: et
+Back: Retour
+Button: Bouton
+Create: Créer
+Edit: Modifier
+hour: heure
+hours: heures
+minute: minute
+minutes: minutes
+month: mois
+months: mois
+second: seconde
+seconds: secondes
+week: semaine
+weeks: semaines
+year: an
+years: ans

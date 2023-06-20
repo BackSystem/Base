@@ -1,39 +1,40 @@
-<h1 class="h2 fw-normal d-inline">{{ title }}</h1>
-{% if subtitle is defined %}
-    <small class="ms-2">{{ subtitle }}</small>
-{% endif %}
-{% if button is defined %}
-    {% set types = {
-        'Add': {
-            color: 'success',
-            icon: 'plus',
-            text: 'Add' | trans
-        },
-        'Create': {
-            color: 'success',
-            icon: 'plus',
-            text: 'Create' | trans
-        },
-        'Edit': {
-            color: 'info',
-            icon: 'pencil',
-            text: 'Edit' | trans
-        },
-        'Back': {
-            color: 'primary',
-            icon: 'arrow-left',
-            text: 'Back' | trans
-        }
-    } %}
-    {% if button.url is defined %}
-        <a href="{{ button.url }}"{% else %}<button{% endif %}
-    class="btn btn-{{ button.color is defined ? button.color : types[button.type].color | default('danger') }} float-end" {% for key, value in button.attr | default([]) %}{{ key | u.snake | replace({ '_': '-' }) }}="{{ value }}"{% endfor %}>
-    {% if button.icon is defined %}
-        {{ icon('solid/' ~ button.icon, { class: 'me-2' }) }}
-    {% elseif types[button.type] is defined %}
-        {{ icon('solid/' ~ types[button.type].icon, { class: 'me-2' }) }}
+<div class="d-flex align-items-center justify-content-between">
+    <h1 class="h2 fw-normal d-inline m-0">{{ title }}</h1>
+    {% if subtitle is defined %}
+        <small class="ms-2">{{ subtitle }}</small>
     {% endif %}
-    <span>
+    {% if button is defined %}
+        {% set types = {
+            'Add': {
+                color: 'success',
+                icon: 'plus',
+                text: 'Add' | trans
+            },
+            'Create': {
+                color: 'success',
+                icon: 'plus',
+                text: 'Create' | trans
+            },
+            'Edit': {
+                color: 'info',
+                icon: 'pencil',
+                text: 'Edit' | trans
+            },
+            'Back': {
+                color: 'primary',
+                icon: 'arrow-left',
+                text: 'Back' | trans
+            }
+        } %}
+        {% if button.url is defined %}
+            <a href="{{ button.url }}"{% else %}<button{% endif %}
+        class="btn btn-{{ button.color is defined ? button.color : types[button.type].color | default('danger') }} d-flex align-items-center ms-3" {% for key, value in button.attr | default([]) %}{{ key | u.snake | replace({ '_': '-' }) }}="{{ value }}"{% endfor %}>
+        {% if button.icon is defined %}
+            {{ icon('solid/' ~ button.icon, { class: 'me-2' }) }}
+        {% elseif types[button.type] is defined %}
+            {{ icon('solid/' ~ types[button.type].icon, { class: 'me-2' }) }}
+        {% endif %}
+        <span>
         {% if button.text is defined %}
             {{ button.text | raw }}
         {% elseif types[button.type] is defined %}
@@ -42,12 +43,13 @@
             {{ 'Button' | trans }}
         {% endif %}
     </span>
-    {% if button.url is defined %}</a>{% else %}</button>{% endif %}
-{% endif %}
+        {% if button.url is defined %}</a>{% else %}</button>{% endif %}
+    {% endif %}
 
-{% if include is defined %}
-    {{ include | raw }}
-{% endif %}
+    {% if include is defined %}
+        {{ include | raw }}
+    {% endif %}
+</div>
 
 {% if items is defined %}
     <hr>
