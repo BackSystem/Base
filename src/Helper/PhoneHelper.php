@@ -19,7 +19,7 @@ class PhoneHelper
         }
 
         if (10 === strlen($phone)) {
-            return strrev(chunk_split(strrev($phone), 2, ' '));
+            return trim(strrev(chunk_split(strrev($phone), 2, ' ')));
         }
 
         if (str_starts_with($phone, '+')) {
