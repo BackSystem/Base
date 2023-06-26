@@ -230,7 +230,7 @@ class Form {
                     displayToast(data.success ? ToastType.Success : ToastType.Error, data.message)
                 }
 
-                if (this.parameters.enableButtonAfterSuccess) {
+                if (!data.success || data.success && this.parameters.enableButtonAfterSuccess) {
                     this.setLoading(false)
                 }
 
