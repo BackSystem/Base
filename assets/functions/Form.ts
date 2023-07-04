@@ -1,4 +1,4 @@
-import displayToast, { ToastType } from '@Base/functions/ToastColor'
+import displayToast, {ToastType} from '@Base/functions/ToastColor'
 
 type Parameters = {
     enableButtonAfterSuccess?: boolean,
@@ -124,7 +124,17 @@ class Form {
         const field = this.form.querySelector('[name="' + fieldName + '"]')
 
         if (field) {
-            const nextElement = field.nextElementSibling
+            let element = field
+
+            if (field.classList.contains('btn-check')) {
+                if (field.nextElementSibling === document.querySelector('label[for="' + field.id + '"]')) {
+                    element = field.nextElementSibling
+
+                    console.log(field.nextElementSibling)
+                }
+            }
+
+            const nextElement = element.nextElementSibling
             let invalidFeedback
 
             if (nextElement?.classList.contains('invalid-feedback')) {
@@ -133,7 +143,7 @@ class Form {
                 invalidFeedback = document.createElement('div')
                 invalidFeedback.classList.add('invalid-feedback')
 
-                field.insertAdjacentElement('afterend', invalidFeedback)
+                element.insertAdjacentElement('afterend', invalidFeedback)
             }
 
             invalidFeedback.innerHTML = errorMessage
@@ -247,7 +257,7 @@ class Form {
                 if (error.name !== 'AbortError') {
                     this.setLoading(false)
 
-                    throw new error
+                    console.error(error.message)
                 }
             })
         })
