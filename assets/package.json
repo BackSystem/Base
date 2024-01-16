@@ -1,0 +1,11 @@
+{
+    "name": "tmmf",
+    "version": "0.0.1-alpha1",
+    "description": "TMMF",
+    "peerDependencies": {
+        "bootstrap": "^5.1.3"
+    },
+    "main": "Northern.js",
+    "author": "ThomasGoffart",
+    "license": "ISC"
+}

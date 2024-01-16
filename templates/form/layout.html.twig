@@ -1,0 +1,44 @@
+{% use 'bootstrap_5_layout.html.twig' %}
+
+{%- block form_row -%}
+	{%- set row_class = row_class | default(row_attr.class | default('mb-0') | trim) -%}
+
+	{{- parent() -}}
+{%- endblock -%}
+
+{%- block form_widget_simple -%}
+	{%- if errors | length -%}
+		{%- set attr = attr | merge({ class: ((attr.class | default('')) ~ ' is-invalid') }) -%}
+	{%- endif -%}
+
+	{%- if type is not defined or (type != 'hidden' and type != 'file') -%}
+		{%- set attr = attr | merge({ autocomplete: (attr.autocomplete | default('off')) | trim, placeholder: (attr.placeholder | default(label) | default(name | humanize)) | trim }) -%}
+	{%- endif -%}
+
+	{%- set required = false -%}
+
+	{{- parent() -}}
+{%- endblock -%}
+
+{%- block choice_widget_collapsed -%}
+	{%- if errors | length -%}
+		{%- set attr = attr | merge({ class: ((attr.class | default('')) ~ ' is-invalid') }) -%}
+	{%- endif -%}
+
+	{{- parent() -}}
+{%- endblock -%}
+
+{%- block textarea_widget -%}
+	{%- set attr = attr | merge({ placeholder: (attr.placeholder | default(label) | default(name | humanize)) | trim }) -%}
+	{{- parent() -}}
+{%- endblock -%}
+
+{%- block form_errors -%}
+	{%- if errors | length > 0 -%}
+		{%- for error in errors -%}
+			{%- set attr = attr | merge({ class: ('invalid-feedback ' ~ (attr.class | default(''))) | trim }) -%}
+
+			<div {% with { attr } %}{{ block('attributes') }}{% endwith %}>{{ error.message }}</div>
+		{%- endfor -%}
+	{%- endif -%}
+{%- endblock form_errors -%}

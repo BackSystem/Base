@@ -1,0 +1,74 @@
+<div class="d-flex align-items-center justify-content-between d-print-none">
+    <h1 class="h2 fw-normal d-inline m-0">{{ title }}</h1>
+    {% if subtitle is defined %}
+        <small class="ms-2">{{ subtitle }}</small>
+    {% endif %}
+    <div class="d-flex align-items-center{{ include_class is defined ? ' ' ~ include_class }}">
+        {% if include is defined %}
+            {{ include | raw }}
+        {% endif %}
+
+        {% if button is defined %}
+            {% set types = {
+                'Add': {
+                    color: 'success',
+                    icon: 'plus',
+                    label: 'Add' | trans
+                },
+                'Create': {
+                    color: 'success',
+                    icon: 'plus',
+                    label: 'Create' | trans
+                },
+                'Edit': {
+                    color: 'info',
+                    icon: 'pencil',
+                    label: 'Edit' | trans
+                },
+                'Back': {
+                    color: 'primary',
+                    icon: 'arrow-left',
+                    label: 'Back' | trans
+                }
+            } %}
+            {% if button.url is defined %}
+                <a href="{{ button.url }}"{% else %}<button{% endif %}
+            class="btn btn-{{ button.color is defined ? button.color : types[button.type].color | default('danger') }} d-flex align-items-center" {% for key, value in button.attr | default([]) %}{{ key | u.snake | replace({ '_': '-' }) }}="{{ value }}"{% endfor %}>
+            {% if button.icon is defined %}
+                {{ icon('solid/' ~ button.icon, { class: 'me-2' }) }}
+            {% elseif types[button.type] is defined %}
+                {{ icon('solid/' ~ types[button.type].icon, { class: 'me-2' }) }}
+            {% endif %}
+            <span>
+            {% if button.label is defined %}
+                {{ button.label | raw }}
+            {% elseif types[button.type] is defined %}
+                {{ types[button.type].label }}
+            {% else %}
+                {{ 'Button' | trans }}
+            {% endif %}
+        </span>
+            {% if button.url is defined %}</a>{% else %}</button>{% endif %}
+        {% endif %}
+    </div>
+</div>
+
+{% if items is defined %}
+    <hr class="d-print-none">
+    <nav class="d-print-none" aria-label="breadcrumb">
+        <ol class="breadcrumb m-0">
+            {% for item in items %}
+                {% if item.name is not empty and (item.condition is not defined or item.condition == true) %}
+                    <li class="breadcrumb-item{{ item.active is defined ? ' active' }}"{{ item.active is defined ? ' aria-current="page"' }}>
+                        {% if item.url is defined %}
+                            <a href="{{ item.url }}">{{ item.name }}</a>
+                        {% else %}
+                            <span class="text-secondary">{{ item.name }}</span>
+                        {% endif %}
+                    </li>
+                {% endif %}
+            {% endfor %}
+        </ol>
+    </nav>
+{% endif %}
+<hr class="d-print-none">

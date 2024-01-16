@@ -1,0 +1,24 @@
+{% set flashes = app.flashes %}
+
+{% if flashes is not empty %}
+    {% set types = { success: 'check', danger: 'xmark', warning: 'exclamation' } %}
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        {% for label, messages in flashes %}
+            {% for message in messages %}
+                <div class="toast align-items-center text-bg-{{ label }} border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <div class="d-flex align-items-center float-start h-100">
+                                <span class="fa-stack me-2">
+                                    <i class="fa-solid fa-badge fa-stack-2x"></i>
+                                    <i class="fa-solid fa-{{ types[label] | default('info') }} fa-stack-1x text-{{ label }}"></i>
+                                </span>
+                            </div>
+                            <span class="d-flex align-items-center h-100">{{ message }}</span>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endfor %}
+    </div>
+{% endif %}

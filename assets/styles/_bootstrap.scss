@@ -1,0 +1,95 @@
+$info: #148190;
+$brown: #802929;
+
+$variable-prefix: '';
+
+$font-size-root: 14px;
+$table-cell-vertical-align: middle;
+
+$table-group-separator-color: #dee2e6;
+
+$tooltip-opacity: 1;
+$tooltip-font-size: 1rem;
+$tooltip-arrow-height: .5rem;
+
+$badge-font-size: 1rem;
+$badge-font-weight: 600;
+
+$btn-font-size-lg: 1rem;
+$form-feedback-font-size: 1rem;
+
+$breadcrumb-divider: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8"><path d="M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z" fill="currentColor"/></svg>');
+
+$popover-body-padding-y: .5rem;
+$zindex-popover: 1010;
+
+$toast-spacing: .5rem;
+$toast-font-size: 1rem;
+
+$paragraph-margin-bottom: 0;
+
+$form-check-label-disabled-opacity: 1;
+
+$font-weight-bolder: 500;
+
+// Configuration
+@import '~bootstrap/scss/functions';
+@import '~bootstrap/scss/variables';
+@import '~bootstrap/scss/variables-dark';
+
+$theme-colors: map-merge($theme-colors, (
+		'purple': $purple,
+		'light-purple': lighten($purple, 10%),
+		'pink': $pink,
+		'orange': $orange,
+		'light-brown': lighten($brown, 10%),
+		'brown': $brown,
+		'dark-brown': darken($brown, 10%),
+));
+
+@import '~bootstrap/scss/maps';
+@import '~bootstrap/scss/mixins';
+@import '~bootstrap/scss/utilities';
+
+// Layout & components
+@import '~bootstrap/scss/root';
+@import '~bootstrap/scss/reboot';
+@import '~bootstrap/scss/type';
+@import '~bootstrap/scss/images';
+@import '~bootstrap/scss/containers';
+@import '~bootstrap/scss/grid';
+@import '~bootstrap/scss/tables';
+@import '~bootstrap/scss/forms';
+@import '~bootstrap/scss/buttons';
+@import '~bootstrap/scss/transitions';
+@import '~bootstrap/scss/dropdown';
+@import '~bootstrap/scss/button-group';
+@import '~bootstrap/scss/nav';
+@import '~bootstrap/scss/navbar';
+@import '~bootstrap/scss/card';
+@import '~bootstrap/scss/accordion';
+@import '~bootstrap/scss/breadcrumb';
+@import '~bootstrap/scss/pagination';
+@import '~bootstrap/scss/badge';
+@import '~bootstrap/scss/alert';
+@import '~bootstrap/scss/progress';
+@import '~bootstrap/scss/list-group';
+@import '~bootstrap/scss/close';
+@import '~bootstrap/scss/toasts';
+@import '~bootstrap/scss/modal';
+@import '~bootstrap/scss/tooltip';
+@import '~bootstrap/scss/popover';
+@import '~bootstrap/scss/carousel';
+@import '~bootstrap/scss/spinners';
+@import '~bootstrap/scss/offcanvas';
+@import '~bootstrap/scss/placeholders';
+
+// Helpers
+@import '~bootstrap/scss/helpers';
+
+// Utilities
+@import '~bootstrap/scss/utilities/api';
+
+// Custom
+@import 'tables.scss';
+@import 'breadcrumb.scss';

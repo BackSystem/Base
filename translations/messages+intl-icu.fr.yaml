@@ -1,0 +1,32 @@
+'{years} years old': >-
+    {years, plural,
+        =0    {# an}
+        =1    {# an}
+        other {# ans}
+    }
+'{years} years and {months} months old': >-
+    {years, plural,
+        =0    {# an}
+        =1    {# an}
+        other {# ans}
+    } et {months} mois
+'{years} years and {days} days old': >-
+    {years, plural,
+        =0    {# an}
+        =1    {# an}
+        other {# ans}
+    } et {days, plural,
+        =0    {# jour}
+        =1    {# jour}
+        other {# jours}
+    }
+'{years} years, {months} months and {days} days old': >-
+    {years, plural,
+        =0    {# an}
+        =1    {# an}
+        other {# ans}
+    }, {months} mois et {days, plural,
+        =0    {# jour}
+        =1    {# jour}
+        other {# jours}
+    }

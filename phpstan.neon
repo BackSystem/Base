@@ -1,0 +1,6 @@
+parameters:
+	level: 8
+	paths:
+		- ./src
+	ignoreErrors:
+		- '#Variable \$[a-zA-Z0-9\_]+ might not be defined\.#'

@@ -1,0 +1,88 @@
+services:
+    BackSystem\Base\Controller\LocaleController:
+        tags: [ 'controller.service_arguments' ]
+        arguments: [ '@security.helper', '@router', '@?' ]
+
+    BackSystem\Base\Helper\Paginator\Paginator:
+        class: 'BackSystem\Base\Helper\Paginator\Paginator'
+        arguments: [ '@knp_paginator', '@request_stack' ]
+
+    BackSystem\Base\Helper\Paginator\PaginatorInterface: '@BackSystem\Base\Helper\Paginator\Paginator'
+
+    BackSystem\Base\Maker\ControllerMaker:
+        tags: [ 'maker.command' ]
+        arguments: [ '@kernel', '@filesystem' ]
+
+    BackSystem\Base\Maker\EntityMaker:
+        tags: [ 'maker.command' ]
+        arguments: [ '@kernel', '@filesystem' ]
+
+    BackSystem\Base\Orm\EventListener\DatabaseSubscriber:
+        tags:
+            -
+                name: 'doctrine.event_listener'
+                event: 'onFlush'
+        arguments: [ '@security.helper', '@doctrine.orm.entity_manager' ]
+
+    BackSystem\Base\Orm\EventListener\ForeignKeysSubscriber:
+        tags:
+            -
+                name: 'doctrine.event_listener'
+                event: 'loadClassMetadata'
+            -
+                name: 'doctrine.event_listener'
+                event: 'postGenerateSchema'
+
+    doctrine.orm.naming_strategy.camel_case:
+        class: 'BackSystem\Base\Orm\NamingStrategy\CamelCaseNamingStrategy'
+
+    BackSystem\Base\Queue\Handler\ServiceMethodMessageHandler:
+        tags: [ 'messenger.message_handler' ]
+        arguments: [ '@service_container' ]
+
+    failed_task_service:
+        class: 'BackSystem\Base\Queue\Service\FailedTaskService'
+        arguments: [ '@messenger.transport.failed', '@messenger.default_bus' ]
+
+    BackSystem\Base\Queue\Service\FailedTaskService: '@failed_task_service'
+
+    scheduled_task_service:
+        class: 'BackSystem\Base\Queue\Service\ScheduledTaskService'
+        arguments: [ '@doctrine.orm.entity_manager', '@messenger.default_serializer' ]
+
+    BackSystem\Base\Queue\Service\ScheduledTaskService: '@scheduled_task_service'
+
+    enqueue_method:
+        class: 'BackSystem\Base\Queue\EnqueueMethod'
+        arguments: [ '@messenger.default_bus' ]
+
+    BackSystem\Base\Queue\EnqueueMethod: '@enqueue_method'
+
+    BackSystem\Base\Service\CollectionService:
+        class: 'BackSystem\Base\Service\CollectionService'
+
+    BackSystem\Base\Service\DateService:
+        arguments: [ '@request_stack', '@security.token_storage', '@translator' ]
+
+    BackSystem\Base\Subscriber\LocaleSubscriber:
+        tags: [ 'kernel.event_subscriber' ]
+        arguments: [ '%kernel.default_locale%' ]
+
+    BackSystem\Base\Subscriber\UserLocaleSubscriber:
+        tags: [ 'kernel.event_subscriber' ]
+        arguments: [ '@request_stack' ]
+
+    BackSystem\Base\Twig\DateExtension:
+        tags: [ 'twig.extension' ]
+        arguments: [ '@BackSystem\Base\Service\DateService' ]
+
+    BackSystem\Base\Twig\IconExtension:
+        tags: [ 'twig.extension' ]
+        arguments: [ '@service_container' ]
+
+    BackSystem\Base\Twig\TimeExtension:
+        tags: [ 'twig.extension' ]
+        arguments: [ '@translator' ]
+
+    BackSystem\Base\Twig\SizeExtension:
+        tags: [ 'twig.extension' ]

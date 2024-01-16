@@ -1,0 +1,16 @@
+version: '3.9'
+services:
+    php:
+        user: '${USER_ID}:${GROUP_ID}'
+        image: backsystem/symfony:8.3.0
+        restart: unless-stopped
+        environment:
+            PHP_CS_FIXER_IGNORE_ENV: 1
+        volumes:
+            - .:/var/www:delegated
+    node:
+        user: '${USER_ID}:${GROUP_ID}'
+        image: node:21.5.0-alpine
+        working_dir: /usr/src/app
+        volumes:
+            - .:/usr/src/app
