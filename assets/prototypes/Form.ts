@@ -48,9 +48,7 @@ HTMLFormElement.prototype.serialize = function () {
             } else {
                 const value = field.value.toString().replace(/\s\s+/g, ' ').trim()
 
-                if (value.length) {
-                    body.set(name, value)
-                }
+                body.set(name, value)
             }
         }
     })

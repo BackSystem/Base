@@ -1,4 +1,4 @@
-import displayToast, { ToastType } from '@Base/functions/ToastColor'
+import displayToast, { ToastType } from './ToastColor'
 
 type Parameters = {
     enableButtonAfterSuccess?: boolean,
@@ -130,7 +130,7 @@ class Form {
                 if (field.nextElementSibling === document.querySelector('label[for="' + field.id + '"]')) {
                     element = field.nextElementSibling
 
-                    console.log(field.nextElementSibling)
+                    // console.log(field.nextElementSibling)
                 }
             }
 
@@ -223,8 +223,6 @@ class Form {
                 window.history.replaceState({}, null, actionUrl)
             }
 
-            console.log(actionUrl)
-
             fetch(actionUrl, init).then(response => {
                 if (response.redirected) {
                     window.location.href = response.url
@@ -258,11 +256,11 @@ class Form {
                     errorCallback(data)
                 }
 
-                if (data.redirection) {
-                    window.location.href = data.redirection
-
-                    return
-                }
+                // if (data.redirection) {
+                //     window.location.href = data.redirection
+                //
+                //     return
+                // }
 
                 this.controller = null
             }).catch((error) => {

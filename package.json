@@ -1,6 +1,6 @@
 {
     "dependencies": {
-        "@backsystem/select": "^1.0.0",
-        "bootstrap": "5.3.0-alpha3"
+        "@backsystem/select": "^1.0",
+        "bootstrap": "^5.3"
     }
 }

@@ -2,6 +2,7 @@
 /node_modules/
 
 .php-cs-fixer.cache
+compose.override.yaml
 composer.lock
 yarn.lock
 
