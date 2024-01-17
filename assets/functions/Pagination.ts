@@ -1,6 +1,6 @@
 import { onClick } from './Event'
 import { html } from './Dom'
-import displayToast, { ToastType } from '@Base/functions/ToastColor'
+import displayToast, { ToastType } from './ToastColor'
 
 const translations = {
     'en': 'An error has occurred',
