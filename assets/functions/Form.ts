@@ -51,6 +51,53 @@ class Form {
         this.parameters = Form.defaults
 
         this.button = this.form.querySelector('button[type="submit"]')
+
+        this.getFields().forEach(field => {
+            this.detectChange(field)
+        })
+
+        new MutationObserver(mutations => {
+            mutations.forEach(mutation => {
+                mutation.addedNodes.forEach(node => {
+                    if (node instanceof HTMLElement) {
+                        if (node instanceof HTMLInputElement || node instanceof HTMLTextAreaElement || node instanceof HTMLSelectElement) {
+                            this.detectChange(node)
+                        }
+
+                        node.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>('input[name]:not([type="hidden"]), textarea[name], select[name]').forEach(field => {
+                            this.detectChange(field)
+                        })
+                    }
+                })
+            })
+        }).observe(this.form, {
+            attributes: false,
+            childList: true,
+            characterData: false,
+            subtree: true,
+        })
+    }
+
+    private detectChange(field: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement): Form {
+        if (field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement) {
+            field.addEventListener('input', () => {
+                this.form.querySelectorAll<HTMLInputElement>('input[name="' + field.name + '"]').forEach(element => {
+                    if (element.checkValidity()) {
+                        element.classList.remove('is-invalid')
+                    }
+                })
+            })
+        }
+
+        if (field instanceof HTMLSelectElement) {
+            field.addEventListener('change', () => {
+                if (field.checkValidity()) {
+                    field.classList.remove('is-invalid')
+                }
+            })
+        }
+
+        return this
     }
 
     public setConfiguration(parameters: Parameters): Form {
@@ -121,35 +168,37 @@ class Form {
     }
 
     public displayError(fieldName: string, errorMessage: string): Form {
-        const field = this.form.querySelector('[name="' + fieldName + '"]')
+        const fields = this.form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>('[name="' + fieldName + '"]')
 
-        if (field) {
-            let element = field
+        fields.forEach(field => {
+            if (field.type !== 'checkbox' && field.type !== 'radio') {
+                let element = field
 
-            if (field.classList.contains('btn-check')) {
-                if (field.nextElementSibling === document.querySelector('label[for="' + field.id + '"]')) {
-                    element = field.nextElementSibling
-
-                    // console.log(field.nextElementSibling)
+                if (field.classList.contains('btn-check')) {
+                    if (field.nextElementSibling === document.querySelector('label[for="' + field.id + '"]')) {
+                        if (field.nextElementSibling instanceof HTMLInputElement) {
+                            element = field.nextElementSibling
+                        }
+                    }
                 }
+
+                const nextElement = element.nextElementSibling
+                let invalidFeedback
+
+                if (nextElement?.classList.contains('invalid-feedback')) {
+                    invalidFeedback = nextElement
+                } else {
+                    invalidFeedback = document.createElement('div')
+                    invalidFeedback.classList.add('invalid-feedback')
+
+                    element.insertAdjacentElement('afterend', invalidFeedback)
+                }
+
+                invalidFeedback.innerHTML = errorMessage
             }
-
-            const nextElement = element.nextElementSibling
-            let invalidFeedback
-
-            if (nextElement?.classList.contains('invalid-feedback')) {
-                invalidFeedback = nextElement
-            } else {
-                invalidFeedback = document.createElement('div')
-                invalidFeedback.classList.add('invalid-feedback')
-
-                element.insertAdjacentElement('afterend', invalidFeedback)
-            }
-
-            invalidFeedback.innerHTML = errorMessage
 
             field.classList.add('is-invalid')
-        }
+        })
 
         return this
     }
@@ -256,11 +305,11 @@ class Form {
                     errorCallback(data)
                 }
 
-                // if (data.redirection) {
-                //     window.location.href = data.redirection
-                //
-                //     return
-                // }
+                if (data.redirection) {
+                    window.location.href = data.redirection
+
+                    return
+                }
 
                 this.controller = null
             }).catch((error) => {
@@ -276,7 +325,7 @@ class Form {
     }
 
     private getFields(): (HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement)[] {
-        return Array.from(this.form.querySelectorAll('input[name], textarea[name], select[name]'))
+        return Array.from(this.form.querySelectorAll('input[name]:not([type="hidden"]), textarea[name], select[name]'))
     }
 
 }

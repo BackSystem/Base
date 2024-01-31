@@ -2,14 +2,15 @@ export {}
 
 declare global {
     interface HTMLFormElement {
-        serialize(): FormData
+        serialize(includingBlank?: boolean): FormData
     }
 }
 
-HTMLFormElement.prototype.serialize = function () {
+HTMLFormElement.prototype.serialize = function (includingBlank: boolean = true) {
+    const form = this as HTMLFormElement
     const body = new FormData()
 
-    const fields = Array.from(this.querySelectorAll('input[name], textarea[name], select[name]')) as (HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement)[]
+    const fields = Array.from(form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>('input[name], textarea[name], select[name]'))
 
     const indexes = new Map()
 
@@ -45,10 +46,16 @@ HTMLFormElement.prototype.serialize = function () {
                         body.set(name, field.value)
                     }
                 }
+            } else if (field instanceof HTMLInputElement && field.type === 'radio') {
+                if (field.checked) {
+                    body.set(name, field.value)
+                }
             } else {
                 const value = field.value.toString().replace(/\s\s+/g, ' ').trim()
 
-                body.set(name, value)
+                if (includingBlank || (!includingBlank && 0 < value.length)) {
+                    body.set(name, value)
+                }
             }
         }
     })
