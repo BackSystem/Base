@@ -81,7 +81,7 @@ class Form {
     private detectChange(field: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement): Form {
         if (field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement) {
             field.addEventListener('input', () => {
-                this.form.querySelectorAll<HTMLInputElement>('input[name="' + field.name + '"]').forEach(element => {
+                this.form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input[name="' + field.name + '"], textarea[name="' + field.name + '"]').forEach(element => {
                     if (element.checkValidity()) {
                         element.classList.remove('is-invalid')
                     }
