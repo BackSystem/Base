@@ -36,10 +36,6 @@ services:
     doctrine.orm.naming_strategy.camel_case:
         class: 'BackSystem\Base\Orm\NamingStrategy\CamelCaseNamingStrategy'
 
-    BackSystem\Base\Queue\Handler\ServiceMethodMessageHandler:
-        tags: [ 'messenger.message_handler' ]
-        arguments: [ '@service_container' ]
-
     failed_task_service:
         class: 'BackSystem\Base\Queue\Service\FailedTaskService'
         arguments: [ '@messenger.transport.failed', '@messenger.default_bus' ]
