@@ -61,9 +61,9 @@
                 {% if item.name is not empty and (item.condition is not defined or item.condition == true) %}
                     <li class="breadcrumb-item{{ item.active is defined ? ' active' }}"{{ item.active is defined ? ' aria-current="page"' }}>
                         {% if item.url is defined %}
-                            <a href="{{ item.url }}">{{ item.name }}</a>
+                            <a href="{{ item.url }}">{{ item.name | raw }}</a>
                         {% else %}
-                            <span class="text-secondary">{{ item.name }}</span>
+                            <span class="text-secondary">{{ item.name | raw }}</span>
                         {% endif %}
                     </li>
                 {% endif %}
