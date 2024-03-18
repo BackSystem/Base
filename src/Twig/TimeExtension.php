@@ -102,7 +102,7 @@ class TimeExtension extends AbstractExtension
             $difference = $input;
         }
 
-        $hours = $difference->h;
+        $hours = $difference->d * 24 + $difference->h;
         $minutes = $difference->i;
 
         if ($hours > 0 && $minutes > 0) {

@@ -20,7 +20,7 @@ class EnqueueMethod
      *
      * @param array<int, mixed> $params
      */
-    public function enqueue(string $service, string $method, array $params = [], \DateTimeInterface $date = null): void
+    public function enqueue(string $service, string $method, array $params = [], ?\DateTimeInterface $date = null): void
     {
         $stamps = [];
 

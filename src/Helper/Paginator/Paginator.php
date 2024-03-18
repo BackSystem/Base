@@ -13,7 +13,7 @@ class Paginator implements PaginatorInterface
     }
 
     /** @phpstan-ignore-next-line */
-    public function paginate(mixed $query, int $limit = null): PaginationInterface
+    public function paginate(mixed $query, ?int $limit = null): PaginationInterface
     {
         $request = $this->requestStack->getCurrentRequest();
         $page = $request ? $request->query->getInt('page', 1) : 1;

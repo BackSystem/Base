@@ -20,17 +20,17 @@ class DateService
     {
     }
 
-    public function formatTime(\DateTimeInterface|string|null $dateTime, string $timeFormat = null, string $pattern = null): ?string
+    public function formatTime(\DateTimeInterface|string|null $dateTime, ?string $timeFormat = null, ?string $pattern = null): ?string
     {
         return $this->formatDatetime($dateTime, 'none', $timeFormat, $pattern);
     }
 
-    public function formatDate(\DateTimeInterface|string|null $dateTime, string $dateFormat = null, string $pattern = null): ?string
+    public function formatDate(\DateTimeInterface|string|null $dateTime, ?string $dateFormat = null, ?string $pattern = null): ?string
     {
         return $this->formatDatetime($dateTime, $dateFormat, 'none', $pattern);
     }
 
-    public function formatDatetime(\DateTimeInterface|string|null $dateTime, string $dateFormat = null, string $timeFormat = null, string $pattern = null): ?string
+    public function formatDatetime(\DateTimeInterface|string|null $dateTime, ?string $dateFormat = null, ?string $timeFormat = null, ?string $pattern = null): ?string
     {
         if (!$dateTime) {
             return null;
