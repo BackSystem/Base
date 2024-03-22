@@ -7,7 +7,7 @@ use Doctrine\ORM\Query\Filter\SQLFilter;
 
 class DeletedFilter extends SQLFilter
 {
-    public function addFilterConstraint(ClassMetadata $targetEntity, string $targetTableAlias): string
+    public function addFilterConstraint(ClassMetadata $targetEntity, $targetTableAlias): string
     {
         if ($targetEntity->hasField('deletedAt')) {
             return $targetTableAlias.'.deleted_at IS NULL';

@@ -3,7 +3,6 @@
 namespace BackSystem\Base\Orm;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\DBAL\LockMode;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -26,7 +25,7 @@ abstract class AbstractRepository extends ServiceEntityRepository
     /**
      * @return T|null
      */
-    public function find(mixed $id, LockMode|int|null $lockMode = null, ?int $lockVersion = null): ?object
+    public function find(mixed $id, $lockMode = null, $lockVersion = null)
     {
         return parent::find($id, $lockMode, $lockVersion);
     }
@@ -42,7 +41,7 @@ abstract class AbstractRepository extends ServiceEntityRepository
     /**
      * @return T[]
      */
-    public function findBy(array $criteria, ?array $orderBy = null, ?int $limit = null, ?int $offset = null): array
+    public function findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null): array
     {
         return parent::findBy($criteria, $orderBy, $limit, $offset);
     }
@@ -50,7 +49,7 @@ abstract class AbstractRepository extends ServiceEntityRepository
     /**
      * @return T|null
      */
-    public function findOneBy(array $criteria, ?array $orderBy = null): ?object
+    public function findOneBy(array $criteria, array $orderBy = null)
     {
         return parent::findOneBy($criteria, $orderBy);
     }
