@@ -90,7 +90,7 @@ class TimeExtension extends AbstractExtension
         return $last ?? '';
     }
 
-    public function shortDuration(int|\DateInterval $input): string
+    public function shortDuration(int|float|\DateInterval $input, string $unit = 'time'): string
     {
         $dtF = new \DateTime('@0');
 
@@ -104,6 +104,22 @@ class TimeExtension extends AbstractExtension
 
         $hours = $difference->d * 24 + $difference->h;
         $minutes = $difference->i;
+
+        if ('day' === $unit) {
+            $days = $hours / 24;
+
+            $number = number_format($days, 2, ',');
+
+            while (str_ends_with($number, '0')) {
+                $number = substr($number, 0, -1);
+            }
+
+            if (str_ends_with($number, ',')) {
+                $number = substr($number, 0, -1);
+            }
+
+            return $number.'j';
+        }
 
         if ($hours > 0 && $minutes > 0) {
             return $hours.'h'.str_pad((string) $minutes, 2, '0', STR_PAD_LEFT);

@@ -41,7 +41,7 @@ abstract class AbstractRepository extends ServiceEntityRepository
     /**
      * @return T[]
      */
-    public function findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null): array
+    public function findBy(array $criteria, ?array $orderBy = null, $limit = null, $offset = null): array
     {
         return parent::findBy($criteria, $orderBy, $limit, $offset);
     }
@@ -49,7 +49,7 @@ abstract class AbstractRepository extends ServiceEntityRepository
     /**
      * @return T|null
      */
-    public function findOneBy(array $criteria, array $orderBy = null)
+    public function findOneBy(array $criteria, ?array $orderBy = null)
     {
         return parent::findOneBy($criteria, $orderBy);
     }
