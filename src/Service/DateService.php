@@ -10,7 +10,7 @@ use Twig\Extra\Intl\IntlExtension;
 
 class DateService
 {
-    public function __construct(private readonly IntlExtension $intlExtension, private readonly RequestStack $requestStack, private readonly TokenStorageInterface $tokenStorage, private readonly TranslatorInterface $translator)
+    public function __construct(private readonly IntlExtension $intlExtension, private readonly Environment $environment, private readonly RequestStack $requestStack, private readonly TokenStorageInterface $tokenStorage, private readonly TranslatorInterface $translator)
     {
     }
 
@@ -35,42 +35,42 @@ class DateService
      * @param \DateTimeInterface|string|null  $date     A date or null to use the current time
      * @param \DateTimeZone|string|false|null $timezone The target timezone, null to use the default, false to leave unchanged
      */
-    public function formatDateTime(Environment $env, $date, ?string $dateFormat = 'medium', ?string $timeFormat = 'medium', string $pattern = '', $timezone = null, string $calendar = 'gregorian', ?string $locale = null, bool $localized = false): string
+    public function formatDateTime($date, ?string $dateFormat = 'medium', ?string $timeFormat = 'medium', string $pattern = '', $timezone = null, string $calendar = 'gregorian', ?string $locale = null, bool $localized = false): string
     {
         if ($localized) {
             $timezone = $this->getUserTimezone();
             $locale = $this->getRequestStack()->getCurrentRequest()?->getLocale();
         }
 
-        return $this->getIntlExtension()->formatDateTime($env, $date, $dateFormat, $timeFormat, $pattern, $timezone, $calendar, $locale);
+        return $this->getIntlExtension()->formatDateTime($this->getEnvironment(), $date, $dateFormat, $timeFormat, $pattern, $timezone, $calendar, $locale);
     }
 
     /**
      * @param \DateTimeInterface|string|null  $date     A date or null to use the current time
      * @param \DateTimeZone|string|false|null $timezone The target timezone, null to use the default, false to leave unchanged
      */
-    public function formatDate(Environment $env, $date, ?string $dateFormat = 'medium', string $pattern = '', $timezone = null, string $calendar = 'gregorian', ?string $locale = null, bool $localized = false): string
+    public function formatDate($date, ?string $dateFormat = 'medium', string $pattern = '', $timezone = null, string $calendar = 'gregorian', ?string $locale = null, bool $localized = false): string
     {
         if ($localized) {
             $timezone = $this->getUserTimezone();
             $locale = $this->getRequestStack()->getCurrentRequest()?->getLocale();
         }
 
-        return $this->getIntlExtension()->formatDate($env, $date, $dateFormat, $pattern, $timezone, $calendar, $locale);
+        return $this->getIntlExtension()->formatDate($this->getEnvironment(), $date, $dateFormat, $pattern, $timezone, $calendar, $locale);
     }
 
     /**
      * @param \DateTimeInterface|string|null  $date     A date or null to use the current time
      * @param \DateTimeZone|string|false|null $timezone The target timezone, null to use the default, false to leave unchanged
      */
-    public function formatTime(Environment $env, $date, ?string $timeFormat = 'medium', string $pattern = '', $timezone = null, string $calendar = 'gregorian', ?string $locale = null, bool $localized = false): string
+    public function formatTime($date, ?string $timeFormat = 'medium', string $pattern = '', $timezone = null, string $calendar = 'gregorian', ?string $locale = null, bool $localized = false): string
     {
         if ($localized) {
             $timezone = $this->getUserTimezone();
             $locale = $this->getRequestStack()->getCurrentRequest()?->getLocale();
         }
 
-        return $this->getIntlExtension()->formatTime($env, $date, $timeFormat, $pattern, $timezone, $calendar, $locale);
+        return $this->getIntlExtension()->formatTime($this->getEnvironment(), $date, $timeFormat, $pattern, $timezone, $calendar, $locale);
     }
 
     public function age(\DateTimeInterface $date, bool $onlyYear = false): string
@@ -110,6 +110,11 @@ class DateService
     private function getIntlExtension(): IntlExtension
     {
         return $this->intlExtension;
+    }
+
+    private function getEnvironment(): Environment
+    {
+        return $this->environment;
     }
 
     private function getRequestStack(): RequestStack
