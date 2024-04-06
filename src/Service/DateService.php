@@ -5,50 +5,20 @@ namespace BackSystem\Base\Service;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Twig\Environment;
+use Twig\Extra\Intl\IntlExtension;
 
 class DateService
 {
-    private const DATE_FORMATS = [
-        'none' => \IntlDateFormatter::NONE,
-        'short' => \IntlDateFormatter::SHORT,
-        'medium' => \IntlDateFormatter::MEDIUM,
-        'long' => \IntlDateFormatter::LONG,
-        'full' => \IntlDateFormatter::FULL,
-    ];
-
-    public function __construct(private readonly RequestStack $requestStack, private readonly TokenStorageInterface $tokenStorage, private readonly TranslatorInterface $translator)
+    public function __construct(private readonly IntlExtension $intlExtension, private readonly RequestStack $requestStack, private readonly TokenStorageInterface $tokenStorage, private readonly TranslatorInterface $translator)
     {
     }
 
-    public function formatTime(\DateTimeInterface|string|null $dateTime, ?string $timeFormat = null, ?string $pattern = null): ?string
+    private function getUserTimezone(): string
     {
-        return $this->formatDatetime($dateTime, 'none', $timeFormat, $pattern);
-    }
-
-    public function formatDate(\DateTimeInterface|string|null $dateTime, ?string $dateFormat = null, ?string $pattern = null): ?string
-    {
-        return $this->formatDatetime($dateTime, $dateFormat, 'none', $pattern);
-    }
-
-    public function formatDatetime(\DateTimeInterface|string|null $dateTime, ?string $dateFormat = null, ?string $timeFormat = null, ?string $pattern = null): ?string
-    {
-        if (!$dateTime) {
-            return null;
-        }
-
-        if (is_string($dateTime)) {
-            try {
-                $dateTime = new \DateTime($dateTime);
-            } catch (\Exception $e) {
-                throw new \RuntimeException($e);
-            }
-        }
-
-        $locale = $this->getRequestStack()->getCurrentRequest()?->getLocale();
+        $timezone = 'Europe/Paris';
 
         $user = $this->getTokenStorage()->getToken()?->getUser();
-
-        $timezone = 'Europe/Paris';
 
         if ($user) {
             $timezones = \DateTimeZone::listIdentifiers();
@@ -58,11 +28,49 @@ class DateService
             }
         }
 
-        $formatter = new \IntlDateFormatter($locale, self::DATE_FORMATS[$dateFormat] ?? self::DATE_FORMATS['full'], self::DATE_FORMATS[$timeFormat] ?? self::DATE_FORMATS['medium'], $timezone, null, $pattern);
+        return $timezone;
+    }
 
-        $format = $formatter->format($dateTime);
+    /**
+     * @param \DateTimeInterface|string|null  $date     A date or null to use the current time
+     * @param \DateTimeZone|string|false|null $timezone The target timezone, null to use the default, false to leave unchanged
+     */
+    public function formatDateTime(Environment $env, $date, ?string $dateFormat = 'medium', ?string $timeFormat = 'medium', string $pattern = '', $timezone = null, string $calendar = 'gregorian', ?string $locale = null, bool $localized = false): string
+    {
+        if ($localized) {
+            $timezone = $this->getUserTimezone();
+            $locale = $this->getRequestStack()->getCurrentRequest()?->getLocale();
+        }
 
-        return is_string($format) ? $format : null;
+        return $this->getIntlExtension()->formatDateTime($env, $date, $dateFormat, $timeFormat, $pattern, $timezone, $calendar, $locale);
+    }
+
+    /**
+     * @param \DateTimeInterface|string|null  $date     A date or null to use the current time
+     * @param \DateTimeZone|string|false|null $timezone The target timezone, null to use the default, false to leave unchanged
+     */
+    public function formatDate(Environment $env, $date, ?string $dateFormat = 'medium', string $pattern = '', $timezone = null, string $calendar = 'gregorian', ?string $locale = null, bool $localized = false): string
+    {
+        if ($localized) {
+            $timezone = $this->getUserTimezone();
+            $locale = $this->getRequestStack()->getCurrentRequest()?->getLocale();
+        }
+
+        return $this->getIntlExtension()->formatDate($env, $date, $dateFormat, $pattern, $timezone, $calendar, $locale);
+    }
+
+    /**
+     * @param \DateTimeInterface|string|null  $date     A date or null to use the current time
+     * @param \DateTimeZone|string|false|null $timezone The target timezone, null to use the default, false to leave unchanged
+     */
+    public function formatTime(Environment $env, $date, ?string $timeFormat = 'medium', string $pattern = '', $timezone = null, string $calendar = 'gregorian', ?string $locale = null, bool $localized = false): string
+    {
+        if ($localized) {
+            $timezone = $this->getUserTimezone();
+            $locale = $this->getRequestStack()->getCurrentRequest()?->getLocale();
+        }
+
+        return $this->getIntlExtension()->formatTime($env, $date, $timeFormat, $pattern, $timezone, $calendar, $locale);
     }
 
     public function age(\DateTimeInterface $date, bool $onlyYear = false): string
@@ -97,6 +105,11 @@ class DateService
             'months' => $months,
             'days' => $days,
         ]);
+    }
+
+    private function getIntlExtension(): IntlExtension
+    {
+        return $this->intlExtension;
     }
 
     private function getRequestStack(): RequestStack

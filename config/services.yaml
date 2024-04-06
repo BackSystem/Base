@@ -19,18 +19,15 @@ services:
 
     BackSystem\Base\Orm\EventListener\DatabaseSubscriber:
         tags:
-            -
-                name: 'doctrine.event_listener'
+            -   name: 'doctrine.event_listener'
                 event: 'onFlush'
         arguments: [ '@security.helper', '@doctrine.orm.entity_manager' ]
 
     BackSystem\Base\Orm\EventListener\ForeignKeysSubscriber:
         tags:
-            -
-                name: 'doctrine.event_listener'
+            -   name: 'doctrine.event_listener'
                 event: 'loadClassMetadata'
-            -
-                name: 'doctrine.event_listener'
+            -   name: 'doctrine.event_listener'
                 event: 'postGenerateSchema'
 
     doctrine.orm.naming_strategy.camel_case:
@@ -58,7 +55,7 @@ services:
         class: 'BackSystem\Base\Service\CollectionService'
 
     BackSystem\Base\Service\DateService:
-        arguments: [ '@request_stack', '@security.token_storage', '@translator' ]
+        arguments: [ '@twig.extension.intl', '@request_stack', '@security.token_storage', '@translator' ]
 
     BackSystem\Base\Subscriber\LocaleSubscriber:
         tags: [ 'kernel.event_subscriber' ]

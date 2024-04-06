@@ -273,8 +273,10 @@ class Form {
             }
 
             fetch(actionUrl, init).then(response => {
-                if (response.redirected) {
-                    window.location.href = response.url
+                if (response.redirected && response.url.includes('login')) {
+                    window.location.reload()
+
+                    return
                 }
 
                 return response.json()
@@ -303,12 +305,6 @@ class Form {
 
                 if (!data.success && errorCallback) {
                     errorCallback(data)
-                }
-
-                if (data.redirection) {
-                    window.location.href = data.redirection
-
-                    return
                 }
 
                 this.controller = null

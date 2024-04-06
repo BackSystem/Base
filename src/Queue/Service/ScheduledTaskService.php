@@ -21,7 +21,7 @@ class ScheduledTaskService
         try {
             $statement = $this->entityManager->getConnection()
                                              ->prepare('SELECT * FROM messenger_messages WHERE queue_name = ? AND created_at != available_at AND delivered_at IS NULL')
-                                             ->executeQuery();
+                                             ->executeQuery(['default']);
 
             $tasks = [];
 

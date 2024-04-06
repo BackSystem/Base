@@ -9,15 +9,15 @@ class DateHelper
      */
     public static function setCorrectDate(\DateTimeInterface $date, \DateTimeInterface $startTime, \DateTimeInterface $endTime, \DateTimeInterface $value): \DateTimeInterface
     {
+        $newEndTime = \DateTime::createFromInterface($endTime);
+
         if ($startTime > $endTime) {
-            $newEndTime = (clone $endTime)->modify('+1 day');
-        } else {
-            $newEndTime = clone $endTime;
+            $newEndTime = $newEndTime->modify('+1 day');
         }
 
-        $difference = $newEndTime->diff($startTime);
+        $difference = $newEndTime->getTimestamp() - $startTime->getTimestamp();
 
-        $reference = (new \DateTimeImmutable())->setTimestamp($startTime->getTimestamp() + ($difference->h * 3600 + $difference->i * 60) / 2)
+        $reference = (new \DateTimeImmutable())->setTimestamp($startTime->getTimestamp() + ($difference / 2))
             ->modify('+12 hours')
             ->setDate(1970, 01, 01);
 
@@ -26,16 +26,8 @@ class DateHelper
 
         $value = $value->setDate((int) $date->format('Y'), (int) $date->format('m'), (int) $date->format('d'));
 
-        if ($startTime > $endTime) {
-            if ($valueTimestamp >= 0 && $valueTimestamp < $referenceTimestamp) {
-                $value = $value->modify('+1 day');
-            }
-        } else {
-            if ($referenceTimestamp >= 0 && $referenceTimestamp < 12 * 60 * 60) {
-                if ($valueTimestamp < $referenceTimestamp) {
-                    $value = $value->modify('+1 day');
-                }
-            }
+        if ($valueTimestamp >= 0 && $valueTimestamp < $referenceTimestamp) {
+            $value = $value->modify('+1 day');
         }
 
         return $value;
