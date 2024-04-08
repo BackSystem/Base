@@ -17,17 +17,16 @@ class DateHelper
 
         $difference = $newEndTime->getTimestamp() - $startTime->getTimestamp();
 
-        $reference = (new \DateTimeImmutable())->setTimestamp($startTime->getTimestamp() + ($difference / 2))
-            ->modify('+12 hours')
-            ->setDate(1970, 01, 01);
+        $reference = (new \DateTimeImmutable())->setTimestamp($startTime->getTimestamp() + ($difference / 2))->modify('+12 hours')->setDate(1970, 01, 01);
 
-        $valueTimestamp = $value->getTimestamp();
-        $referenceTimestamp = $reference->getTimestamp();
+        $value = $value->setDate(1970, 01, 01);
 
         $value = $value->setDate((int) $date->format('Y'), (int) $date->format('m'), (int) $date->format('d'));
 
-        if ($valueTimestamp >= 0 && $valueTimestamp < $referenceTimestamp) {
-            $value = $value->modify('+1 day');
+        if ($startTime->format('d') !== $endTime->format('d')) {
+            if ((int) $value->format('Hi') >= 0 && (int) $value->format('Hi') < (int) $reference->format('Hi')) {
+                $value = $value->modify('+1 day');
+            }
         }
 
         return $value;
