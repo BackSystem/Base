@@ -6,9 +6,14 @@ class DateHelper
 {
     /**
      * Sets the correct date (Y-m-d) to $value based on current $date, $startTime and $endTime.
+     *
+     * @return ($value is \DateTime ? \DateTime : \DateTimeImmutable)
      */
-    public static function setCorrectDate(\DateTimeInterface $date, \DateTimeInterface $startTime, \DateTimeInterface $endTime, \DateTimeInterface $value): \DateTimeInterface
+    public static function setCorrectDate(\DateTimeInterface $date, \DateTimeInterface $startTime, \DateTimeInterface $endTime, \DateTimeInterface $value): \DateTime|\DateTimeImmutable
     {
+        $isDateTimeImmutable = $date instanceof \DateTimeImmutable;
+
+        $newValue = \DateTime::createFromInterface($value);
         $newEndTime = \DateTime::createFromInterface($endTime);
 
         if ($startTime > $endTime) {
@@ -19,17 +24,15 @@ class DateHelper
 
         $reference = (new \DateTimeImmutable())->setTimestamp($startTime->getTimestamp() + ($difference / 2))->modify('+12 hours')->setDate(1970, 01, 01);
 
-        $value = $value->setDate(1970, 01, 01);
-
-        $value = $value->setDate((int) $date->format('Y'), (int) $date->format('m'), (int) $date->format('d'));
+        $newValue = $newValue->setDate((int) $date->format('Y'), (int) $date->format('m'), (int) $date->format('d'));
 
         if ($startTime->format('d') !== $endTime->format('d')) {
-            if ((int) $value->format('Hi') >= 0 && (int) $value->format('Hi') < (int) $reference->format('Hi')) {
-                $value = $value->modify('+1 day');
+            if ((int) $newValue->format('Hi') >= 0 && (int) $newValue->format('Hi') < (int) $reference->format('Hi')) {
+                $newValue = $newValue->modify('+1 day');
             }
         }
 
-        return $value;
+        return $isDateTimeImmutable ? \DateTimeImmutable::createFromMutable($newValue) : $newValue;
     }
 
     public static function getDateTime(\DateTimeInterface|string|null $value, string $format = 'Y-m-d'): ?\DateTime

@@ -9,3 +9,8 @@ stan:
 .PHONY: format
 format:
 	$(php) vendor/bin/php-cs-fixer fix --diff
+
+.PHONY: lint
+lint:
+	make format
+	make stan
