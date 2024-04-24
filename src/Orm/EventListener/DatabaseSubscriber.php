@@ -2,6 +2,7 @@
 
 namespace BackSystem\Base\Orm\EventListener;
 
+use BackSystem\Base\Orm\Attribute\DisableTimestampHydration;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\OnFlushEventArgs;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -19,6 +20,12 @@ class DatabaseSubscriber
         $unitOfWork = $entityManager->getUnitOfWork();
 
         foreach ($unitOfWork->getScheduledEntityUpdates() as $object) {
+            $reflectionClass = new \ReflectionClass($object);
+
+            if (!empty($reflectionClass->getAttributes(DisableTimestampHydration::class))) {
+                continue;
+            }
+
             $hasUpdatedAt = method_exists($object, 'getUpdatedAt') && method_exists($object, 'setUpdatedAt');
 
             if ($hasUpdatedAt) {
@@ -30,6 +37,12 @@ class DatabaseSubscriber
         }
 
         foreach ($unitOfWork->getScheduledEntityInsertions() as $object) {
+            $reflectionClass = new \ReflectionClass($object);
+
+            if (!empty($reflectionClass->getAttributes(DisableTimestampHydration::class))) {
+                continue;
+            }
+
             $hasCreatedBy = method_exists($object, 'getCreatedBy') && method_exists($object, 'setCreatedBy');
             $hasCreatedAt = method_exists($object, 'getCreatedAt') && method_exists($object, 'setCreatedAt');
 
@@ -55,6 +68,12 @@ class DatabaseSubscriber
         }
 
         foreach ($unitOfWork->getScheduledEntityDeletions() as $object) {
+            $reflectionClass = new \ReflectionClass($object);
+
+            if (!empty($reflectionClass->getAttributes(DisableTimestampHydration::class))) {
+                continue;
+            }
+
             $hasDeletedBy = method_exists($object, 'getDeletedBy') && method_exists($object, 'setDeletedBy');
             $hasDeletedAt = method_exists($object, 'getDeletedAt') && method_exists($object, 'setDeletedAt');
 
