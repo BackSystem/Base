@@ -2,6 +2,7 @@
 
 namespace BackSystem\Base\Service;
 
+use BackSystem\Base\Helper\DateHelper;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -12,6 +13,17 @@ class DateService
 {
     public function __construct(private readonly IntlExtension $intlExtension, private readonly Environment $environment, private readonly RequestStack $requestStack, private readonly TokenStorageInterface $tokenStorage, private readonly TranslatorInterface $translator)
     {
+    }
+
+    public function getFromRequest(): \DateTimeImmutable
+    {
+        $date = DateHelper::getDateTimeImmutable($this->getRequestStack()->getCurrentRequest()?->query->getString('date'));
+
+        if (!$date) {
+            $date = new \DateTimeImmutable('today');
+        }
+
+        return $date;
     }
 
     private function getUserTimezone(): string
