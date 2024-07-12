@@ -13,7 +13,8 @@ class DateHelper
     {
         $isDateTimeImmutable = $date instanceof \DateTimeImmutable;
 
-        $newValue = \DateTime::createFromInterface($value);
+        $value = \DateTime::createFromInterface($value)->setDate(1970, 01, 01);
+        $newValue = \DateTime::createFromInterface($value)->setDate(1970, 01, 01);
         $newEndTime = \DateTime::createFromInterface($endTime);
 
         if ($startTime > $endTime) {
@@ -28,6 +29,10 @@ class DateHelper
 
         if ($startTime->format('d') !== $endTime->format('d')) {
             if ((int) $newValue->format('Hi') >= 0 && (int) $newValue->format('Hi') < (int) $reference->format('Hi')) {
+                $newValue = $newValue->modify('+1 day');
+            }
+        } else {
+            if ($value <= $reference && (int) $value->format('Hi') < (int) $startTime->format('Hi') && (int) $reference->format('Hi') < (int) $endTime->format('Hi')) {
                 $newValue = $newValue->modify('+1 day');
             }
         }
