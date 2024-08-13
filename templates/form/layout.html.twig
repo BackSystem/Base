@@ -34,11 +34,13 @@
 {%- endblock -%}
 
 {%- block form_errors -%}
-	{%- if errors | length > 0 -%}
-		{%- for error in errors -%}
-			{%- set attr = attr | merge({ class: ('invalid-feedback ' ~ (attr.class | default(''))) | trim }) -%}
+	<div class="invalid-feedbacks" data-field="{{ full_name }}">
+		{%- if errors | length > 0 -%}
+			{%- set attr = attr | merge({ class: ('invalid-feedback d-block' ~ (attr.class | default(''))) | trim }) -%}
 
-			<div {% with { attr } %}{{ block('attributes') }}{% endwith %}>{{ error.message }}</div>
-		{%- endfor -%}
-	{%- endif -%}
+			{%- for error in errors -%}
+				<div {% with { attr } %}{{ block('attributes') }}{% endwith %}>{{ error.message }}</div>
+			{%- endfor -%}
+		{%- endif -%}
+	</div>
 {%- endblock form_errors -%}

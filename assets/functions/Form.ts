@@ -14,9 +14,7 @@ class Form {
     private buttonSpinner: HTMLSpanElement
 
     private fields = new Map()
-    private invalidFeedbacks = new Map()
 
-    private validation: boolean = false
     private reset: boolean = true
 
     private dynamicDelay: NodeJS.Timeout = null
@@ -50,7 +48,7 @@ class Form {
 
         this.parameters = Form.defaults
 
-        this.button = this.form.querySelector('button[type="submit"]')
+        this.button = this.form.querySelector<HTMLButtonElement>('button[type="submit"]')
 
         this.getFields().forEach(field => {
             this.detectChange(field)
@@ -84,6 +82,8 @@ class Form {
                 this.form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input[name="' + field.name + '"], textarea[name="' + field.name + '"]').forEach(element => {
                     if (element.checkValidity()) {
                         element.classList.remove('is-invalid')
+
+                        this.hideErrors(field.name)
                     }
                 })
             })
@@ -93,6 +93,8 @@ class Form {
             field.addEventListener('change', () => {
                 if (field.checkValidity()) {
                     field.classList.remove('is-invalid')
+
+                    this.hideErrors(field.name)
                 }
             })
         }
@@ -159,15 +161,23 @@ class Form {
         return this
     }
 
-    public hideErrors(): Form {
-        this.invalidFeedbacks.forEach((invalidFeedback, field) => {
-            field.classList.remove('is-invalid')
+    public hideErrors(fieldName?: string): Form {
+        let invalidFeedbacksContainersDiv: NodeListOf<HTMLDivElement>
+
+        if (fieldName) {
+            invalidFeedbacksContainersDiv = this.form.querySelectorAll<HTMLDivElement>(`div.invalid-feedbacks[data-field="${fieldName}"]`)
+        } else {
+            invalidFeedbacksContainersDiv = this.form.querySelectorAll<HTMLDivElement>('div.invalid-feedbacks')
+        }
+
+        invalidFeedbacksContainersDiv.forEach(invalidFeedbacksContainerDiv => {
+            invalidFeedbacksContainerDiv.innerHTML = ''
         })
 
         return this
     }
 
-    public displayError(fieldName: string, errorMessage: string): Form {
+    public displayError(fieldName: string, errorMessages: string | string[]): Form {
         const fields = this.form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>('[name="' + fieldName + '"]')
 
         fields.forEach(field => {
@@ -182,19 +192,49 @@ class Form {
                     }
                 }
 
-                const nextElement = element.nextElementSibling
-                let invalidFeedback
+                let invalidFeedbacksContainersDiv = this.form.querySelectorAll<HTMLDivElement>('div.invalid-feedbacks[data-field="' + field.name + '"]')
 
-                if (nextElement?.classList.contains('invalid-feedback')) {
-                    invalidFeedback = nextElement
+                if (invalidFeedbacksContainersDiv.length) {
+                    invalidFeedbacksContainersDiv.forEach(invalidFeedbacksContainerDiv => {
+                        if (Array.isArray(errorMessages)) {
+                            errorMessages.forEach(errorMessage => {
+                                const invalidFeedbackDiv = document.createElement('div')
+                                invalidFeedbackDiv.classList.add('invalid-feedback', 'd-block')
+                                invalidFeedbackDiv.innerHTML = errorMessage
+
+                                invalidFeedbacksContainerDiv.appendChild(invalidFeedbackDiv)
+                            })
+                        } else {
+                            const invalidFeedbackDiv = document.createElement('div')
+                            invalidFeedbackDiv.classList.add('invalid-feedback', 'd-block')
+                            invalidFeedbackDiv.innerHTML = errorMessages
+
+                            invalidFeedbacksContainerDiv.appendChild(invalidFeedbackDiv)
+                        }
+                    })
                 } else {
-                    invalidFeedback = document.createElement('div')
-                    invalidFeedback.classList.add('invalid-feedback')
+                    const invalidFeedbacksContainerDiv = document.createElement('div')
+                    invalidFeedbacksContainerDiv.classList.add('invalid-feedbacks')
+                    invalidFeedbacksContainerDiv.dataset.field = field.name
 
-                    element.insertAdjacentElement('afterend', invalidFeedback)
+                    if (Array.isArray(errorMessages)) {
+                        errorMessages.forEach(errorMessage => {
+                            const invalidFeedbackDiv = document.createElement('div')
+                            invalidFeedbackDiv.classList.add('invalid-feedback', 'd-block')
+                            invalidFeedbackDiv.innerHTML = errorMessage
+
+                            invalidFeedbacksContainerDiv.appendChild(invalidFeedbackDiv)
+                        })
+                    } else {
+                        const invalidFeedbackDiv = document.createElement('div')
+                        invalidFeedbackDiv.classList.add('invalid-feedback', 'd-block')
+                        invalidFeedbackDiv.innerHTML = errorMessages
+
+                        invalidFeedbacksContainerDiv.appendChild(invalidFeedbackDiv)
+                    }
+
+                    element.insertAdjacentElement('afterend', invalidFeedbacksContainerDiv)
                 }
-
-                invalidFeedback.innerHTML = errorMessage
             }
 
             field.classList.add('is-invalid')
@@ -220,6 +260,7 @@ class Form {
             })
 
             this.setLoading(true)
+            this.hideErrors()
 
             const body = this.form.serialize()
 
