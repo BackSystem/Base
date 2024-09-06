@@ -9,11 +9,11 @@ class Form {
     private static instances = new Map()
 
     private readonly form: HTMLFormElement
-    private button: HTMLButtonElement
-    private buttonText: HTMLSpanElement
-    private buttonSpinner: HTMLSpanElement
 
     private fields = new Map()
+
+    private submitButtonTexts = new Map()
+    private submitButtonSpinners = new Map()
 
     private reset: boolean = true
 
@@ -131,32 +131,39 @@ class Form {
     }
 
     public setLoading(isLoading: boolean): Form {
-        if (!this.buttonText && !this.buttonSpinner) {
-            const inner = this.button.innerHTML
+        const submitButtons = this.form.querySelectorAll<HTMLButtonElement>('button[type="submit"]')
 
-            this.button.innerHTML = ''
+        submitButtons.forEach(submitButton => {
+            if (!this.submitButtonTexts.has(submitButton)) {
+                const inner = submitButton.innerHTML
 
-            this.buttonText = document.createElement('span')
-            this.buttonText.innerHTML = inner
+                submitButton.innerHTML = ''
 
-            this.buttonSpinner = document.createElement('i')
-            this.buttonSpinner.classList.add('fa-duotone', 'fa-fw', 'fa-spinner-third', 'fa-spin', 'd-none')
+                const buttonText = document.createElement('span')
+                buttonText.innerHTML = inner
 
-            this.button.appendChild(this.buttonText)
-            this.button.appendChild(this.buttonSpinner)
-        }
+                const buttonSpinner = document.createElement('i')
+                buttonSpinner.classList.add('fa-duotone', 'fa-fw', 'fa-spinner-third', 'fa-spin', 'd-none')
 
-        if (isLoading) {
-            this.button.disabled = true
+                submitButton.appendChild(buttonText)
+                submitButton.appendChild(buttonSpinner)
 
-            this.buttonText.classList.add('d-none')
-            this.buttonSpinner.classList.remove('d-none')
-        } else {
-            this.button.disabled = false
+                this.submitButtonTexts.set(submitButton, buttonText)
+                this.submitButtonSpinners.set(submitButton, buttonSpinner)
+            }
 
-            this.buttonSpinner.classList.add('d-none')
-            this.buttonText.classList.remove('d-none')
-        }
+            if (isLoading) {
+                submitButton.disabled = true
+
+                this.submitButtonTexts.get(submitButton).classList.add('d-none')
+                this.submitButtonSpinners.get(submitButton).classList.remove('d-none')
+            } else {
+                submitButton.disabled = false
+
+                this.submitButtonSpinners.get(submitButton).classList.add('d-none')
+                this.submitButtonTexts.get(submitButton).classList.remove('d-none')
+            }
+        })
 
         return this
     }

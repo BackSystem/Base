@@ -60,7 +60,7 @@
     <nav class="d-print-none" aria-label="breadcrumb">
         <ol class="breadcrumb m-0">
             {% for item in items %}
-                {% if item.name is not empty and (item.condition is not defined or item.condition == true) %}
+                {% if (item.condition is not defined or item.condition == true) and item.name is not empty %}
                     <li class="breadcrumb-item{{ item.active is defined ? ' active' }}"{{ item.active is defined ? ' aria-current="page"' }}>
                         {% if item.url is defined %}
                             <a href="{{ item.url }}">{{ item.name | raw }}</a>
@@ -73,4 +73,5 @@
         </ol>
     </nav>
 {% endif %}
+
 <hr class="d-print-none">
