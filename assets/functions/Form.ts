@@ -48,8 +48,6 @@ class Form {
 
         this.parameters = Form.defaults
 
-        this.button = this.form.querySelector<HTMLButtonElement>('button[type="submit"]')
-
         this.getFields().forEach(field => {
             this.detectChange(field)
         })
