@@ -36,7 +36,7 @@
 {%- block form_errors -%}
 	<div class="invalid-feedbacks" data-field="{{ full_name }}">
 		{%- if errors | length > 0 -%}
-			{%- set attr = attr | merge({ class: ('invalid-feedback d-block' ~ (attr.class | default(''))) | trim }) -%}
+			{%- set attr = attr | merge({ class: ('invalid-feedback d-block ' ~ (attr.class | default(''))) | trim }) -%}
 
 			{%- for error in errors -%}
 				<div {% with { attr } %}{{ block('attributes') }}{% endwith %}>{{ error.message }}</div>
