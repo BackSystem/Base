@@ -6,7 +6,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
-class TimeExtension extends AbstractExtension
+final class TimeExtension extends AbstractExtension
 {
     public function __construct(private readonly TranslatorInterface $translator)
     {
@@ -15,9 +15,9 @@ class TimeExtension extends AbstractExtension
     public function getFilters(): array
     {
         return [
-            new TwigFilter('ago', [$this, 'ago']),
-            new TwigFilter('duration', [$this, 'duration']),
-            new TwigFilter('short_duration', [$this, 'shortDuration']),
+            new TwigFilter('ago', $this->ago(...)),
+            new TwigFilter('duration', $this->duration(...)),
+            new TwigFilter('short_duration', $this->shortDuration(...)),
         ];
     }
 
@@ -36,14 +36,14 @@ class TimeExtension extends AbstractExtension
 
     public function duration(int|\DateInterval $input, bool $onlyDate = false, ?int $numberOfParts = null): string
     {
-        $dtF = new \DateTime('@0');
+        $dateTimeFrom = new \DateTime('@0');
 
-        if (!$input instanceof \DateInterval) {
-            $dtT = new \DateTime("@$input");
-
-            $difference = $dtF->diff($dtT);
-        } else {
+        if ($input instanceof \DateInterval) {
             $difference = $input;
+        } else {
+            $dateTimeTo = (new \DateTime())->setTimestamp((int) $input);
+
+            $difference = $dateTimeFrom->diff($dateTimeTo);
         }
 
         $parts = [];
@@ -96,14 +96,14 @@ class TimeExtension extends AbstractExtension
 
     public function shortDuration(int|float|\DateInterval $input, string $unit = 'time'): string
     {
-        $dtF = new \DateTime('@0');
+        $dateTimeFrom = new \DateTime('@0');
 
-        if (!$input instanceof \DateInterval) {
-            $dtT = new \DateTime("@$input");
-
-            $difference = $dtF->diff($dtT);
-        } else {
+        if ($input instanceof \DateInterval) {
             $difference = $input;
+        } else {
+            $dateTimeTo = (new \DateTime())->setTimestamp((int) $input);
+
+            $difference = $dateTimeFrom->diff($dateTimeTo);
         }
 
         $hours = $difference->d * 24 + $difference->h;

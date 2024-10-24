@@ -4,6 +4,7 @@
 .php-cs-fixer.cache
 compose.override.yaml
 composer.lock
+php.ini
 yarn.lock
 
 /.idea/

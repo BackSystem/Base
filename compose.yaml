@@ -2,7 +2,7 @@ version: '3.9'
 services:
     php:
         user: '${USER_ID}:${GROUP_ID}'
-        image: backsystem/symfony:8.3.0
+        image: backsystem/symfony:8.3.12
         restart: unless-stopped
         environment:
             PHP_CS_FIXER_IGNORE_ENV: 1

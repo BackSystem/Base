@@ -6,7 +6,7 @@ use BackSystem\Base\Service\DateService;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 
-class DateExtension extends AbstractExtension
+final class DateExtension extends AbstractExtension
 {
     public function __construct(private readonly DateService $dateService)
     {
