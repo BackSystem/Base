@@ -79,3 +79,4 @@ services:
 
     BackSystem\Base\Twig\SizeExtension:
         tags: [ 'twig.extension' ]
+        arguments: [ '@twig' ]
