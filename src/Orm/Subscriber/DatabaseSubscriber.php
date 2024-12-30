@@ -1,6 +1,6 @@
 <?php
 
-namespace BackSystem\Base\Orm\EventListener;
+namespace BackSystem\Base\Orm\Subscriber;
 
 use BackSystem\Base\Orm\Attribute\DisableTimestampHydration;
 use Doctrine\ORM\EntityManagerInterface;
@@ -8,14 +8,18 @@ use Doctrine\ORM\Event\OnFlushEventArgs;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
 
-class DatabaseSubscriber
+final class DatabaseSubscriber
 {
-    public function __construct(private readonly Security $security, private readonly EntityManagerInterface $entityManager)
+    public function __construct(private readonly Security $security, private readonly EntityManagerInterface $entityManager, private readonly bool $enabled)
     {
     }
 
     public function onFlush(OnFlushEventArgs $event): void
     {
+        if (!$this->enabled) {
+            return;
+        }
+
         $entityManager = $event->getObjectManager();
         $unitOfWork = $entityManager->getUnitOfWork();
 

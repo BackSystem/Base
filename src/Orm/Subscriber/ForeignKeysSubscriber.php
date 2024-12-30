@@ -1,16 +1,24 @@
 <?php
 
-namespace BackSystem\Base\Orm\EventListener;
+namespace BackSystem\Base\Orm\Subscriber;
 
 use Doctrine\DBAL\Schema\SchemaException;
 use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 use Doctrine\ORM\Tools\Event\GenerateSchemaEventArgs;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 
-class ForeignKeysSubscriber
+final class ForeignKeysSubscriber
 {
+    public function __construct(private readonly bool $enabled)
+    {
+    }
+
     public function loadClassMetadata(LoadClassMetadataEventArgs $eventArgs): void
     {
+        if (!$this->enabled) {
+            return;
+        }
+
         $classMetadata = $eventArgs->getClassMetadata();
         $table = $classMetadata->table;
 
