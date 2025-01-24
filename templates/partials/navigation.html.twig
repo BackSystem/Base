@@ -10,7 +10,7 @@
             {{ include | raw }}
         {% endif %}
 
-        {% if button is defined %}
+        {% if button is defined and (button.condition is not defined or button.condition) %}
             {% set types = {
                 'Add': {
                     color: 'success',
