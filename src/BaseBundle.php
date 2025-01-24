@@ -3,6 +3,8 @@
 namespace BackSystem\Base;
 
 use BackSystem\Base\Controller\LocaleController;
+use BackSystem\Base\Orm\Subscriber\DoctrineMetadataQuotingSubscriber;
+use BackSystem\Base\Orm\Subscriber\ForeignKeysSubscriber;
 use BackSystem\Base\Queue\QueueInterface;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -26,11 +28,19 @@ final class BaseBundle extends AbstractBundle
         $container->import('../config/services.yaml');
 
         $container->services()->get(LocaleController::class)->arg(2, $config['locale_redirection']);
+        $container->services()->get(DoctrineMetadataQuotingSubscriber::class)->arg(0, $config['orm']['surround_metadata_names_with_quotes']);
+        $container->services()->get(ForeignKeysSubscriber::class)->arg(0, $config['orm']['use_domain_as_schema_name']);
     }
 
     public function configure(DefinitionConfigurator $definition): void
     {
         /* @phpstan-ignore-next-line */
-        $definition->rootNode()->children()->scalarNode('locale_redirection')->defaultValue('home_index')?->end()?->end();
+        $definition->rootNode()
+            ->children()
+            ->scalarNode('locale_redirection')->defaultValue('home_index')?->end()
+            ->arrayNode('orm')->children()
+            ->scalarNode('surround_metadata_names_with_quotes')->defaultTrue()?->end()
+            ->scalarNode('use_domain_as_schema_name')->defaultFalse()?->end()
+            ?->end();
     }
 }

@@ -17,21 +17,24 @@ services:
         tags: [ 'maker.command' ]
         arguments: [ '@kernel', '@filesystem' ]
 
-    BackSystem\Base\Orm\EventListener\DatabaseSubscriber:
-        tags:
-            -   name: 'doctrine.event_listener'
-                event: 'onFlush'
-        arguments: [ '@security.helper', '@doctrine.orm.entity_manager' ]
-
-    BackSystem\Base\Orm\EventListener\ForeignKeysSubscriber:
-        tags:
-            -   name: 'doctrine.event_listener'
-                event: 'loadClassMetadata'
-            -   name: 'doctrine.event_listener'
-                event: 'postGenerateSchema'
-
     doctrine.orm.naming_strategy.camel_case:
         class: 'BackSystem\Base\Orm\NamingStrategy\CamelCaseNamingStrategy'
+
+    BackSystem\Base\Orm\Subscriber\DatabaseSubscriber:
+        tags:
+            - { name: 'doctrine.event_listener', event: 'onFlush' }
+        arguments: [ '@security.helper', '@doctrine.orm.entity_manager', '@?' ]
+
+    BackSystem\Base\Orm\Subscriber\DoctrineMetadataQuotingSubscriber:
+        tags:
+            - { name: 'doctrine.event_listener', event: 'loadClassMetadata' }
+        arguments: [ '@?' ]
+
+    BackSystem\Base\Orm\Subscriber\ForeignKeysSubscriber:
+        tags:
+            - { name: 'doctrine.event_listener', event: 'loadClassMetadata' }
+            - { name: 'doctrine.event_listener', event: 'postGenerateSchema' }
+        arguments: [ '@?' ]
 
     failed_task_service:
         class: 'BackSystem\Base\Queue\Service\FailedTaskService'
