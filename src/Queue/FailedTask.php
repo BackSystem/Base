@@ -9,7 +9,7 @@ use Symfony\Component\Messenger\Stamp\RedeliveryStamp;
 
 class FailedTask
 {
-    private readonly string $id;
+    private string $id;
 
     public function __construct(private readonly Envelope $envelope)
     {

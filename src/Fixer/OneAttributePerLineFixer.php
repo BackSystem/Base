@@ -20,6 +20,57 @@ final class OneAttributePerLineFixer extends AbstractFixer implements Whitespace
         return new FixerDefinition('Soon.', []);
     }
 
+    protected function applyFix(\SplFileInfo $file, Tokens $tokens): void
+    {
+        foreach ($tokens as $index => $token) {
+            if ('#[' === $token?->getContent()) {
+                for ($i = 1; $i <= 2; ++$i) {
+                    if (in_array($tokens[$index - $i]->getContent(), [',', '('], true)) {
+                        continue 2;
+                    }
+                }
+
+                $endTokenIndex = $this->getAttributeEndTokenIndex($tokens, $index);
+
+                if (']' !== $tokens[$index - 2]->getContent() && !$tokens[$index - 2]->isComment()) {
+                    $count = substr_count($tokens[$index - 1]->getContent(), "\n");
+
+                    if ($count < 2) {
+                        $whiteSpace = $this->whitespacesConfig->getLineEnding();
+
+                        $whiteSpace = str_repeat($whiteSpace, 3 - $count);
+
+                        $indent = $this->detectIndent($tokens, $endTokenIndex + 1);
+
+                        $tokens[$index - 1] = new Token([T_WHITESPACE, $whiteSpace.$indent]);
+                    }
+                }
+            }
+        }
+
+        foreach ($tokens as $index => $token) {
+            if ('#[' === $token?->getContent()) {
+                for ($i = 1; $i <= 2; ++$i) {
+                    if (in_array($tokens[$index - $i]->getContent(), [',', '('], true)) {
+                        continue 2;
+                    }
+                }
+
+                $endTokenIndex = $this->getAttributeEndTokenIndex($tokens, $index);
+
+                if (!str_contains($tokens[$endTokenIndex + 1]->getContent(), "\n")) {
+                    $whiteSpace = $this->whitespacesConfig->getLineEnding();
+
+                    $indent = $this->detectIndent($tokens, $endTokenIndex + 1);
+
+                    $tokens->insertAt($endTokenIndex + 1, new Token([T_WHITESPACE, $whiteSpace.$indent]));
+
+                    $tokens->removeLeadingWhitespace($endTokenIndex + 3, ' ');
+                }
+            }
+        }
+    }
+
     private function getAttributeEndTokenIndex(Tokens $tokens, int $startIndex): int
     {
         $endToken = null;
@@ -44,45 +95,6 @@ final class OneAttributePerLineFixer extends AbstractFixer implements Whitespace
         }
 
         return $endTokenIndex;
-    }
-
-    protected function applyFix(\SplFileInfo $file, Tokens $tokens): void
-    {
-        foreach ($tokens as $index => $token) {
-            if ('#[' === $token?->getContent()) {
-                $endTokenIndex = $this->getAttributeEndTokenIndex($tokens, $index);
-
-                if (']' !== $tokens[$index - 2]->getContent() && !$tokens[$index - 2]->isComment()) {
-                    $count = substr_count($tokens[$index - 1]->getContent(), "\n");
-
-                    if ($count < 2) {
-                        $whiteSpace = $this->whitespacesConfig->getLineEnding();
-
-                        $whiteSpace = str_repeat($whiteSpace, 3 - $count);
-
-                        $indent = $this->detectIndent($tokens, $endTokenIndex + 1);
-
-                        $tokens[$index - 1] = new Token([T_WHITESPACE, $whiteSpace.$indent]);
-                    }
-                }
-            }
-        }
-
-        foreach ($tokens as $index => $token) {
-            if ('#[' === $token?->getContent()) {
-                $endTokenIndex = $this->getAttributeEndTokenIndex($tokens, $index);
-
-                if (!str_contains($tokens[$endTokenIndex + 1]->getContent(), "\n")) {
-                    $whiteSpace = $this->whitespacesConfig->getLineEnding();
-
-                    $indent = $this->detectIndent($tokens, $endTokenIndex + 1);
-
-                    $tokens->insertAt($endTokenIndex + 1, new Token([T_WHITESPACE, $whiteSpace.$indent]));
-
-                    $tokens->removeLeadingWhitespace($endTokenIndex + 3, ' ');
-                }
-            }
-        }
     }
 
     public function getPriority(): int
