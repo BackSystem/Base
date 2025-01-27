@@ -34,13 +34,15 @@ final class BaseBundle extends AbstractBundle
 
     public function configure(DefinitionConfigurator $definition): void
     {
-        /* @phpstan-ignore-next-line */
         $definition->rootNode()
             ->children()
-            ->scalarNode('locale_redirection')->defaultValue('home_index')?->end()
-            ->arrayNode('orm')->children()
-            ->scalarNode('surround_metadata_names_with_quotes')->defaultTrue()?->end()
-            ->scalarNode('use_domain_as_schema_name')->defaultFalse()?->end()
-            ?->end();
+            ->scalarNode('locale_redirection')->defaultValue('home_index')->end()
+            ->arrayNode('orm')
+                ->addDefaultsIfNotSet()
+                ->children()
+                    ->scalarNode('surround_metadata_names_with_quotes')->defaultTrue()->end()
+                    ->scalarNode('use_domain_as_schema_name')->defaultFalse()->end()
+                ->end()
+            ->end();
     }
 }
