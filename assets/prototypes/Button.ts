@@ -18,16 +18,19 @@ HTMLElement.prototype.setLoading = function (enable: boolean = true) {
     }
 
     if (!buttons.has(this)) {
+        this.classList.add('position-relative')
+
         const span = document.createElement('span')
         span.classList.add('visually-hidden')
         span.wrapAll(this.childNodes)
 
-        const icon = document.createElement('i')
-        icon.classList.add('fa-duotone', 'fa-fw', 'fa-spinner-third', 'fa-spin')
+        const spinnerDiv = document.createElement('div')
+        spinnerDiv.classList.add('spinner-border', 'spinner-border-sm')
+        spinnerDiv.role = 'status'
 
-        buttons.set(this, [span, icon])
+        buttons.set(this, [span, spinnerDiv])
 
-        this.appendChild(icon)
+        this.appendChild(spinnerDiv)
     }
 
     const items = buttons.get(this)
