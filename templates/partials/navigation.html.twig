@@ -1,11 +1,11 @@
 <div class="d-flex align-items-center justify-content-between d-print-none">
-    <div class="d-flex align-items-center">
+    <div class="navigation-title d-flex align-items-center">
         <h1 class="h2 fw-normal d-inline m-0">{{ title | raw }}</h1>
         {% if subtitle is defined %}
             <small class="ms-2">{{ subtitle | raw }}</small>
         {% endif %}
     </div>
-    <div class="d-flex align-items-center justify-content-end flex-grow-1{{ include_class is defined ? ' ' ~ include_class }}">
+    <div class="navigation-actions d-flex align-items-center justify-content-end flex-grow-1{{ include_class is defined ? ' ' ~ include_class }}">
         {% if include is defined %}
             {{ include | raw }}
         {% endif %}
@@ -57,7 +57,7 @@
 
 {% if items is defined %}
     <hr class="d-print-none">
-    <nav class="d-print-none" aria-label="breadcrumb">
+    <nav class="navigation-breadcrumb d-print-none" aria-label="breadcrumb">
         <ol class="breadcrumb m-0">
             {% for item in items %}
                 {% if (item.condition is not defined or item.condition == true) and item.name is not empty %}
