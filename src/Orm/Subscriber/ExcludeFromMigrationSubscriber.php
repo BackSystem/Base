@@ -49,6 +49,12 @@ final class ExcludeFromMigrationSubscriber
             }
 
             if ($entityClassName) {
+                if ($schemaName !== $defaultSchemaName) {
+                    $schema->dropTable($table->getName());
+
+                    continue;
+                }
+
                 $reflectionClass = new \ReflectionClass($entityClassName);
 
                 if ([] !== $reflectionClass->getAttributes(ExcludeFromMigration::class)) {

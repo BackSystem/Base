@@ -3,8 +3,7 @@
 namespace BackSystem\Base;
 
 use BackSystem\Base\Controller\LocaleController;
-use BackSystem\Base\Orm\Subscriber\DoctrineMetadataQuotingSubscriber;
-use BackSystem\Base\Orm\Subscriber\ForeignKeysSubscriber;
+use BackSystem\Base\Orm\Subscriber\TimestampSubscriber;
 use BackSystem\Base\Queue\QueueInterface;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -28,8 +27,7 @@ final class BaseBundle extends AbstractBundle
         $container->import('../config/services.yaml');
 
         $container->services()->get(LocaleController::class)->arg(2, $config['locale_redirection']);
-        $container->services()->get(DoctrineMetadataQuotingSubscriber::class)->arg(0, $config['orm']['surround_metadata_names_with_quotes']);
-        $container->services()->get(ForeignKeysSubscriber::class)->arg(0, $config['orm']['use_domain_as_schema_name']);
+        $container->services()->get(TimestampSubscriber::class)->arg(2, $config['orm']['enable_timestamp_hydrators']);
     }
 
     public function configure(DefinitionConfigurator $definition): void
@@ -40,8 +38,7 @@ final class BaseBundle extends AbstractBundle
             ->arrayNode('orm')
                 ->addDefaultsIfNotSet()
                 ->children()
-                    ->scalarNode('surround_metadata_names_with_quotes')->defaultTrue()->end()
-                    ->scalarNode('use_domain_as_schema_name')->defaultFalse()->end()
+                    ->scalarNode('enable_timestamp_hydrators')->defaultTrue()->end()
                 ->end()
             ->end();
     }

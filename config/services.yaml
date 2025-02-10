@@ -20,15 +20,9 @@ services:
     doctrine.orm.naming_strategy.camel_case:
         class: 'BackSystem\Base\Orm\NamingStrategy\CamelCaseNamingStrategy'
 
-    BackSystem\Base\Orm\Subscriber\DatabaseSubscriber:
-        tags:
-            - { name: 'doctrine.event_listener', event: 'onFlush' }
-        arguments: [ '@security.helper', '@doctrine.orm.entity_manager', '@?' ]
-
     BackSystem\Base\Orm\Subscriber\DoctrineMetadataQuotingSubscriber:
         tags:
             - { name: 'doctrine.event_listener', event: 'loadClassMetadata' }
-        arguments: [ '@?' ]
 
     BackSystem\Base\Orm\Subscriber\ExcludeFromMigrationSubscriber:
         tags:
@@ -37,9 +31,12 @@ services:
 
     BackSystem\Base\Orm\Subscriber\ForeignKeysSubscriber:
         tags:
-            - { name: 'doctrine.event_listener', event: 'loadClassMetadata' }
             - { name: 'doctrine.event_listener', event: 'postGenerateSchema' }
-        arguments: [ '@?' ]
+
+    BackSystem\Base\Orm\Subscriber\TimestampSubscriber:
+        tags:
+            - { name: 'doctrine.event_listener', event: 'onFlush' }
+        arguments: [ '@security.helper', '@doctrine.orm.entity_manager', '@?' ]
 
     failed_task_service:
         class: 'BackSystem\Base\Queue\Service\FailedTaskService'

@@ -8,7 +8,7 @@ use Doctrine\ORM\Event\OnFlushEventArgs;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\PropertyAccess\PropertyAccessor;
 
-final class DatabaseSubscriber
+final class TimestampSubscriber
 {
     public function __construct(private readonly Security $security, private readonly EntityManagerInterface $entityManager, private readonly bool $enabled)
     {

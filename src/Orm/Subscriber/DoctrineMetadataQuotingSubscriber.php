@@ -6,16 +6,8 @@ use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 
 final class DoctrineMetadataQuotingSubscriber
 {
-    public function __construct(private readonly bool $enabled)
-    {
-    }
-
     public function loadClassMetadata(LoadClassMetadataEventArgs $args): void
     {
-        if (!$this->enabled) {
-            return;
-        }
-
         $classMetadata = $args->getClassMetadata();
 
         // Quote schema and table names
@@ -34,14 +26,21 @@ final class DoctrineMetadataQuotingSubscriber
             }
         }
 
+        // Quote field column names
+        // foreach ($classMetadata->columnNames as $key => $value) {
+        //     $classMetadata->columnNames[$key] = $this->quote($value);
+        // }
+
         // Quote association join column names
-        foreach ($classMetadata->associationMappings as &$association) {
-            if (isset($association['joinColumns'])) {
-                foreach ($association['joinColumns'] as &$joinColumn) {
-                    $joinColumn['name'] = $this->quote($joinColumn['name']);
-                }
-            }
-        }
+        // foreach ($classMetadata->associationMappings as $associationKey => $association) {
+        //     if (isset($association['joinColumns'])) {
+        //         foreach ($association['joinColumns'] as $joinColumn) {
+        //             $joinColumn->name = $this->quote($joinColumn->name);
+        //         }
+        //
+        //         dump($association);
+        //     }
+        // }
     }
 
     private function quote(string $value): string
