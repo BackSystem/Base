@@ -23,15 +23,17 @@ services:
     BackSystem\Base\Orm\Subscriber\DoctrineMetadataQuotingSubscriber:
         tags:
             - { name: 'doctrine.event_listener', event: 'loadClassMetadata' }
+        arguments: [ '@?' ]
 
     BackSystem\Base\Orm\Subscriber\ExcludeFromMigrationSubscriber:
         tags:
             - { name: 'doctrine.event_listener', event: 'postGenerateSchema' }
         arguments: [ '@doctrine.orm.entity_manager' ]
 
-    BackSystem\Base\Orm\Subscriber\ForeignKeysSubscriber:
-        tags:
-            - { name: 'doctrine.event_listener', event: 'postGenerateSchema' }
+#    BackSystem\Base\Orm\Subscriber\ForeignKeysSubscriber:
+#        tags:
+#            - { name: 'doctrine.event_listener', event: 'loadClassMetadata' }
+#            - { name: 'doctrine.event_listener', event: 'postGenerateSchema' }
 
     BackSystem\Base\Orm\Subscriber\TimestampSubscriber:
         tags:

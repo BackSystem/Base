@@ -3,6 +3,7 @@
 namespace BackSystem\Base;
 
 use BackSystem\Base\Controller\LocaleController;
+use BackSystem\Base\Orm\Subscriber\DoctrineMetadataQuotingSubscriber;
 use BackSystem\Base\Orm\Subscriber\TimestampSubscriber;
 use BackSystem\Base\Queue\QueueInterface;
 use Symfony\Component\Config\Definition\Configurator\DefinitionConfigurator;
@@ -27,6 +28,7 @@ final class BaseBundle extends AbstractBundle
         $container->import('../config/services.yaml');
 
         $container->services()->get(LocaleController::class)->arg(2, $config['locale_redirection']);
+        $container->services()->get(DoctrineMetadataQuotingSubscriber::class)->arg(0, $config['orm']['surround_metadata_names_with_quotes']);
         $container->services()->get(TimestampSubscriber::class)->arg(2, $config['orm']['enable_timestamp_hydrators']);
     }
 
@@ -38,7 +40,8 @@ final class BaseBundle extends AbstractBundle
             ->arrayNode('orm')
                 ->addDefaultsIfNotSet()
                 ->children()
-                    ->scalarNode('enable_timestamp_hydrators')->defaultTrue()->end()
+                    ->scalarNode('surround_metadata_names_with_quotes')->defaultFalse()->end()
+                    ->scalarNode('enable_timestamp_hydrators')->defaultFalse()->end()
                 ->end()
             ->end();
     }

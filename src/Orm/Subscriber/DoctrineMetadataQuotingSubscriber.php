@@ -6,8 +6,16 @@ use Doctrine\ORM\Event\LoadClassMetadataEventArgs;
 
 final class DoctrineMetadataQuotingSubscriber
 {
+    public function __construct(private readonly bool $enabled)
+    {
+    }
+
     public function loadClassMetadata(LoadClassMetadataEventArgs $args): void
     {
+        if (!$this->enabled) {
+            return;
+        }
+
         $classMetadata = $args->getClassMetadata();
 
         // Quote schema and table names
