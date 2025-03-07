@@ -35,7 +35,7 @@
             } %}
             {% if button.url is defined %}
                 <a href="{{ button.url }}"{% else %}<button{% endif %}
-            class="btn btn-{{ button.color is defined ? button.color : types[button.type].color | default('danger') }} d-flex align-items-center" {% for key, value in button.attr | default([]) %}{{ key | u.snake | replace({ '_': '-' }) }}="{{ value }}"{% endfor %}>
+            class="btn btn-{{ button.color is defined ? button.color : types[button.type].color | default('danger') }} d-flex align-items-center text-nowrap" {% for key, value in button.attr | default([]) %}{{ key | u.snake | replace({ '_': '-' }) }}="{{ value }}"{% endfor %}>
             {% if button.icon is defined %}
                 {{ icon('solid/' ~ button.icon, { class: 'me-2' }) }}
             {% elseif types[button.type] is defined %}
