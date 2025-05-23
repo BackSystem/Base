@@ -9,7 +9,7 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
 use Twig\Extra\Intl\IntlExtension;
 
-class DateService
+final class DateService
 {
     public function __construct(private readonly IntlExtension $intlExtension, private readonly Environment $environment, private readonly RequestStack $requestStack, private readonly TokenStorageInterface $tokenStorage, private readonly TranslatorInterface $translator)
     {

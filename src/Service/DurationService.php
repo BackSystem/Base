@@ -1,24 +1,21 @@
 <?php
 
-namespace BackSystem\Base\Twig;
+namespace BackSystem\Base\Service;
 
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Twig\Extension\AbstractExtension;
-use Twig\TwigFilter;
 
-final class TimeExtension extends AbstractExtension
+final class DurationService
 {
     public function __construct(private readonly TranslatorInterface $translator)
     {
     }
 
-    public function getFilters(): array
+    public function convertToHoursMinutes(float $decimalHours): string
     {
-        return [
-            new TwigFilter('ago', $this->ago(...)),
-            new TwigFilter('duration', $this->duration(...)),
-            new TwigFilter('short_duration', $this->shortDuration(...)),
-        ];
+        $hours = floor($decimalHours);
+        $minutes = round(($decimalHours - $hours) * 60);
+
+        return sprintf('%dh%02d', $hours, $minutes);
     }
 
     public function ago(\DateTimeInterface $input, bool $onlyDate = false, ?int $numberOfParts = null): string
@@ -28,10 +25,10 @@ final class TimeExtension extends AbstractExtension
         $duration = $this->duration($difference, $onlyDate, $numberOfParts);
 
         if ($difference->invert) {
-            return $this->getTranslator()->trans('%time% ago', ['%time%' => $duration]);
+            return $this->translator->trans('%time% ago', ['%time%' => $duration]);
         }
 
-        return $this->getTranslator()->trans('in %time%', ['%time%' => $duration]);
+        return $this->translator->trans('in %time%', ['%time%' => $duration]);
     }
 
     public function duration(int|\DateInterval $input, bool $onlyDate = false, ?int $numberOfParts = null): string
@@ -56,28 +53,28 @@ final class TimeExtension extends AbstractExtension
         $seconds = $difference->s;
 
         if ($years > 0) {
-            $parts[] = $years.' '.$this->getTranslator()->trans($years > 1 ? 'years' : 'year');
+            $parts[] = $years.' '.$this->translator->trans($years > 1 ? 'years' : 'year');
         }
 
         if ($months > 0) {
-            $parts[] = $months.' '.$this->getTranslator()->trans($months > 1 ? 'months' : 'month');
+            $parts[] = $months.' '.$this->translator->trans($months > 1 ? 'months' : 'month');
         }
 
         if ($days > 0) {
-            $parts[] = $days.' '.$this->getTranslator()->trans($days > 1 ? 'days' : 'day');
+            $parts[] = $days.' '.$this->translator->trans($days > 1 ? 'days' : 'day');
         }
 
         if (false === $onlyDate) {
             if ($hours > 0) {
-                $parts[] = $hours.' '.$this->getTranslator()->trans($hours > 1 ? 'hours' : 'hour');
+                $parts[] = $hours.' '.$this->translator->trans($hours > 1 ? 'hours' : 'hour');
             }
 
             if ($minutes > 0) {
-                $parts[] = $minutes.' '.$this->getTranslator()->trans($minutes > 1 ? 'minutes' : 'minute');
+                $parts[] = $minutes.' '.$this->translator->trans($minutes > 1 ? 'minutes' : 'minute');
             }
 
             if ($seconds > 0) {
-                $parts[] = $seconds.' '.$this->getTranslator()->trans($seconds > 1 ? 'seconds' : 'second');
+                $parts[] = $seconds.' '.$this->translator->trans($seconds > 1 ? 'seconds' : 'second');
             }
         }
 
@@ -88,7 +85,7 @@ final class TimeExtension extends AbstractExtension
         $last = array_pop($parts);
 
         if ($parts) {
-            return implode(', ', $parts).' '.$this->getTranslator()->trans('and').' '.$last;
+            return implode(', ', $parts).' '.$this->translator->trans('and').' '.$last;
         }
 
         return $last ?? '';
@@ -138,10 +135,5 @@ final class TimeExtension extends AbstractExtension
         }
 
         return '';
-    }
-
-    private function getTranslator(): TranslatorInterface
-    {
-        return $this->translator;
     }
 }

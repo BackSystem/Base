@@ -5,7 +5,7 @@ namespace BackSystem\Base\Service;
 use BackSystem\Base\Helper\CollectionHelper;
 use Doctrine\Common\Collections\Collection;
 
-class CollectionService
+final class CollectionService
 {
     /**
      * @template T

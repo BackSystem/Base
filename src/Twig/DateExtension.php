@@ -15,15 +15,10 @@ final class DateExtension extends AbstractExtension
     public function getFilters(): array
     {
         return [
-            new TwigFilter('format_datetime', [$this->getDateService(), 'formatDatetime']),
-            new TwigFilter('format_date', [$this->getDateService(), 'formatDate']),
-            new TwigFilter('format_time', [$this->getDateService(), 'formatTime']),
-            new TwigFilter('age', [$this->getDateService(), 'age']),
+            new TwigFilter('format_datetime', [$this->dateService, 'formatDatetime']),
+            new TwigFilter('format_date', [$this->dateService, 'formatDate']),
+            new TwigFilter('format_time', [$this->dateService, 'formatTime']),
+            new TwigFilter('age', [$this->dateService, 'age']),
         ];
-    }
-
-    private function getDateService(): DateService
-    {
-        return $this->dateService;
     }
 }
