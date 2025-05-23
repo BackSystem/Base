@@ -63,6 +63,9 @@ services:
     BackSystem\Base\Service\DateService:
         arguments: [ '@twig.extension.intl', '@twig', '@request_stack', '@security.token_storage', '@translator' ]
 
+    BackSystem\Base\Service\DurationService:
+        arguments: [ '@translator' ]
+
     BackSystem\Base\Subscriber\LocaleSubscriber:
         tags: [ 'kernel.event_subscriber' ]
         arguments: [ '%kernel.default_locale%' ]
@@ -79,7 +82,7 @@ services:
         tags: [ 'twig.extension' ]
         arguments: [ '@service_container' ]
 
-    BackSystem\Base\Twig\TimeExtension:
+    BackSystem\Base\Twig\DurationExtension:
         tags: [ 'twig.extension' ]
         arguments: [ '@translator' ]
 
