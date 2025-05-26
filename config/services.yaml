@@ -84,7 +84,7 @@ services:
 
     BackSystem\Base\Twig\DurationExtension:
         tags: [ 'twig.extension' ]
-        arguments: [ '@translator' ]
+        arguments: [ '@BackSystem\Base\Service\DurationService' ]
 
     BackSystem\Base\Twig\SizeExtension:
         tags: [ 'twig.extension' ]
