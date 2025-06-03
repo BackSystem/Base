@@ -19,55 +19,15 @@ export default class Cascade {
             const element = event.target as HTMLElement
 
             if (element instanceof HTMLSelectElement) {
-                const name = element.getAttribute('name')
+                this.fetchChildrenElement(element)
+            }
+        })
 
-                Cascade.list.forEach(fields => {
+        document.addEventListener('input', event => {
+            const element = event.target as HTMLElement
 
-                    if (fields.hasOwnProperty(name)) {
-                        const form = element.closest('form')
-                        const children = this.getChildrenToDisable(fields, name)
-
-                        children.forEach(childName => {
-                            const child = form.querySelector('select[name="' + childName + '"]') as HTMLSelectElement
-
-                            if (child) {
-                                child.disabled = true
-                            }
-                        })
-
-                        const method = form.method ?? 'post'
-                        const body = new FormData(form)
-
-                        let action = form.getAttribute('action') ?? window.location.origin + window.location.pathname
-                        let init = { method }
-
-                        if (method === 'get') {
-                            const searchParams = new URLSearchParams()
-
-                            body.forEach((value: string, key) => {
-                                if (value.length > 0) {
-                                    searchParams.append(key, value.toString())
-                                }
-                            })
-
-                            if (searchParams.toString().length > 0) {
-                                action += `?${searchParams.toString()}`
-                            }
-
-                            window.history.replaceState({}, null, action)
-                        } else {
-                            init['body'] = body
-                        }
-
-                        fetch(action, init).then(response => response.text()).then(data => {
-                            const body = new DOMParser().parseFromString(data, 'text/html').body
-
-                            children.forEach(childName => {
-                                this.replaceElement(body, childName)
-                            })
-                        })
-                    }
-                })
+            if (element instanceof HTMLInputElement) {
+                this.fetchChildrenElement(element)
             }
         })
     }
@@ -112,6 +72,61 @@ export default class Cascade {
                 }
             }
         }
+    }
+
+    private fetchChildrenElement(element: HTMLElement) {
+        const name = element.getAttribute('name')
+
+        Cascade.list.forEach(fields => {
+            if (fields.hasOwnProperty(name)) {
+                const form = element.closest('form')
+                const children = this.getChildrenToDisable(fields, name)
+
+                children.forEach(childName => {
+                    const child = form.querySelector('select[name="' + childName + '"]') as HTMLSelectElement
+
+                    if (child) {
+                        child.disabled = true
+                    }
+                })
+
+                const method = form.method ?? 'post'
+                const body = new FormData(form)
+
+                let action = form.getAttribute('action') ?? window.location.origin + window.location.pathname
+                let init = {
+                    method, headers: {
+                        'Dynamic': '1',
+                    },
+                }
+
+                if (method === 'get') {
+                    const searchParams = new URLSearchParams()
+
+                    body.forEach((value: string, key) => {
+                        if (value.length > 0) {
+                            searchParams.append(key, value.toString())
+                        }
+                    })
+
+                    if (searchParams.toString().length > 0) {
+                        action += `?${searchParams.toString()}`
+                    }
+
+                    window.history.replaceState({}, null, action)
+                } else {
+                    init['body'] = body
+                }
+
+                fetch(action, init).then(response => response.text()).then(data => {
+                    const body = new DOMParser().parseFromString(data, 'text/html').body
+
+                    children.forEach(childName => {
+                        this.replaceElement(body, childName)
+                    })
+                })
+            }
+        })
     }
 
 }
