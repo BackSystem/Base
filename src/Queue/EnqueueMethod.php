@@ -15,10 +15,10 @@ class EnqueueMethod
     /**
      * @psalm-template T of object
      *
+     * @param array<int, mixed> $params
+     *
      * @psalm-param class-string<T> $service
      * @psalm-param callable-string<T> $method
-     *
-     * @param array<int, mixed> $params
      */
     public function enqueue(string $service, string $method, array $params = [], ?\DateTimeInterface $date = null): void
     {

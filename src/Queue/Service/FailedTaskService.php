@@ -15,7 +15,7 @@ class FailedTaskService
 
     public function __construct(TransportInterface $receiver, private readonly MessageBusInterface $messageBus)
     {
-        if (!($receiver instanceof ListableReceiverInterface)) {
+        if (!$receiver instanceof ListableReceiverInterface) {
             throw new \RuntimeException(sprintf('Service %s expects a receiver of type %s.', self::class, ListableReceiverInterface::class));
         }
 
