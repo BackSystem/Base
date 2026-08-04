@@ -1,5 +1,5 @@
-import { html } from '../functions/Dom'
-import { onClick } from '../functions/Event'
+import {html} from '../functions/Dom'
+import {onClick} from '../functions/Event'
 
 function rewriteIndexAttributes(element: Element, oldIndex: number, newIndex: number) {
     const attrs = ['name', 'id', 'for']
@@ -67,7 +67,7 @@ function reindexCollection(container: HTMLElement) {
 }
 
 onClick('.add-item[data-collection-holder-class]', function () {
-    const { collectionHolderClass } = this.dataset
+    const {collectionHolderClass} = this.dataset
 
     const container = document.querySelector(`[data-collection="${collectionHolderClass}"]`) as HTMLElement
 
@@ -75,7 +75,11 @@ onClick('.add-item[data-collection-holder-class]', function () {
         return
     }
 
-    const { prototype } = container.dataset
+    const {prototype} = container.dataset
+
+    if (!prototype) {
+        return
+    }
 
     let index = parseInt(container.dataset.index || '0', 10)
 

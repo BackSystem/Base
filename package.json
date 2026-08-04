@@ -2,5 +2,8 @@
     "dependencies": {
         "@backsystem/select": "^1.0",
         "bootstrap": "^5.3"
+    },
+    "devDependencies": {
+        "@types/bootstrap": "^5.2.11"
     }
 }

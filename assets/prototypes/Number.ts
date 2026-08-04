@@ -2,18 +2,32 @@ export {}
 
 declare global {
     interface Number {
-        pad(number?: number): string
-
+        pad(length?: number): string
         sizeFormat(decimals?: number): string
     }
 }
 
-Number.prototype.pad = function (number: number = 2): string {
-    return (new Array(number).join('0') + this).slice(-number)
+Number.prototype.pad = function (length: number = 2): string {
+    return String(this.valueOf()).padStart(length, '0')
 }
 
 Number.prototype.sizeFormat = function (decimals: number = 2): string {
-    const i = Math.floor(Math.log(this) / Math.log(1024))
+    const value = this.valueOf()
 
-    return (this / Math.pow(1024, i)).toFixed(decimals).replace('.', ',') + ' ' + ['o', 'ko', 'Mo', 'Go', 'To'][i]
+    if (value === 0) {
+        return `0 ${['o'][0]}`
+    }
+
+    const units = ['o', 'ko', 'Mo', 'Go', 'To']
+    const index = Math.min(
+        Math.floor(Math.log(Math.abs(value)) / Math.log(1024)),
+        units.length - 1
+    )
+
+    return (
+        (value / Math.pow(1024, index))
+            .toFixed(decimals)
+            .replace('.', ',') +
+        ` ${units[index]}`
+    )
 }

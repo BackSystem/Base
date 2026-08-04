@@ -1,52 +1,69 @@
 import displayToast, { ToastType } from './ToastColor'
 
-type Parameters = {
-    enableButtonAfterSuccess?: boolean,
+type FormParameters = {
+    enableButtonAfterSuccess?: boolean
 }
 
+type FormField =
+    | HTMLInputElement
+    | HTMLTextAreaElement
+    | HTMLSelectElement
+
+type FormErrors = Record<string, string | string[]>
+
+export type FormResponse = {
+    success: boolean
+    message?: string
+    errors?: FormErrors
+    redirect?: string
+}
+
+type FormCallback = (data: FormResponse) => void
+
 class Form {
+    private static instances = new Map<HTMLFormElement, Form>()
 
-    private static instances = new Map()
-
-    private readonly form: HTMLFormElement
-
-    private fields = new Map()
-
-    private submitButtonTexts = new Map()
-    private submitButtonSpinners = new Map()
-
-    private reset: boolean = true
-
-    private dynamicDelay: NodeJS.Timeout = null
-
-    private controller = null
-
-    private static defaults: Parameters = {
+    private static defaults: FormParameters = {
         enableButtonAfterSuccess: true,
     }
 
-    private parameters: Parameters = {}
+    private readonly form: HTMLFormElement
 
-    static get(form: HTMLFormElement): Form {
-        if (!form) {
-            return
+    private readonly submitButtonTexts =
+        new Map<HTMLButtonElement, HTMLSpanElement>()
+
+    private readonly submitButtonSpinners =
+        new Map<HTMLButtonElement, HTMLElement>()
+
+    private reset = true
+
+    private dynamicDelay: ReturnType<typeof setTimeout> | null = null
+
+    private controller: AbortController | null = null
+
+    private parameters: FormParameters = {}
+
+    public static get(form: HTMLFormElement): Form {
+        let instance = Form.instances.get(form)
+
+        if (!instance) {
+            instance = new Form(form)
+            Form.instances.set(form, instance)
         }
 
-        if (!Form.instances.has(form)) {
-            Form.instances.set(form, new Form(form))
+        return instance
+    }
+
+    public static setDefaults(parameters: FormParameters): void {
+        Form.defaults = {
+            ...Form.defaults,
+            ...parameters,
         }
-
-        return Form.instances.get(form)
     }
 
-    static setDefaults(parameters: Parameters) {
-        Form.defaults = { ...Form.defaults, ...parameters }
-    }
-
-    constructor(form: HTMLFormElement) {
+    public constructor(form: HTMLFormElement) {
         this.form = form
-
-        this.parameters = Form.defaults
+        this.parameters = { ...Form.defaults }
 
         this.getFields().forEach(field => {
             this.detectChange(field)
@@ -55,15 +72,27 @@ class Form {
         new MutationObserver(mutations => {
             mutations.forEach(mutation => {
                 mutation.addedNodes.forEach(node => {
-                    if (node instanceof HTMLElement) {
-                        if (node instanceof HTMLInputElement || node instanceof HTMLTextAreaElement || node instanceof HTMLSelectElement) {
-                            this.detectChange(node)
-                        }
+                    if (!(node instanceof HTMLElement)) {
+                        return
+                    }
 
-                        node.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>('input[name]:not([type="hidden"]), textarea[name], select[name]').forEach(field => {
+                    if (
+                        node instanceof HTMLInputElement ||
+                        node instanceof HTMLTextAreaElement ||
+                        node instanceof HTMLSelectElement
+                    ) {
+                        this.detectChange(node)
+                    }
+
+                    node
+                        .querySelectorAll<FormField>(
+                            'input[name]:not([type="hidden"]), ' +
+                            'textarea[name], ' +
+                            'select[name]'
+                        )
+                        .forEach(field => {
                             this.detectChange(field)
                         })
-                    }
                 })
             })
         }).observe(this.form, {
@@ -74,16 +103,26 @@ class Form {
         })
     }
 
-    private detectChange(field: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement): Form {
-        if (field instanceof HTMLInputElement || field instanceof HTMLTextAreaElement) {
+    private detectChange(field: FormField): Form {
+        if (
+            field instanceof HTMLInputElement ||
+            field instanceof HTMLTextAreaElement
+        ) {
             field.addEventListener('input', () => {
-                this.form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>('input[name="' + field.name + '"], textarea[name="' + field.name + '"]').forEach(element => {
-                    if (element.checkValidity()) {
-                        element.classList.remove('is-invalid')
+                const selector =
+                    `input[name="${CSS.escape(field.name)}"], ` +
+                    `textarea[name="${CSS.escape(field.name)}"]`
 
-                        this.hideErrors(field.name)
-                    }
-                })
+                this.form
+                    .querySelectorAll<HTMLInputElement | HTMLTextAreaElement>(
+                        selector
+                    )
+                    .forEach(element => {
+                        if (element.checkValidity()) {
+                            element.classList.remove('is-invalid')
+                            this.hideErrors(field.name)
+                        }
+                    })
             })
         }
 
@@ -91,7 +130,6 @@ class Form {
             field.addEventListener('change', () => {
                 if (field.checkValidity()) {
                     field.classList.remove('is-invalid')
-
                     this.hideErrors(field.name)
                 }
             })
@@ -100,25 +138,34 @@ class Form {
         return this
     }
 
-    public setConfiguration(parameters: Parameters): Form {
-        this.parameters = { ...Form.defaults, ...parameters }
+    public setConfiguration(parameters: FormParameters): Form {
+        this.parameters = {
+            ...Form.defaults,
+            ...parameters,
+        }
 
         return this
     }
 
     public enableDynamic(delay: number = 500): Form {
-        this.fields.forEach((field) => {
-            const event = field instanceof HTMLInputElement ? 'input' : 'change'
+        this.getFields().forEach(field => {
+            const eventType =
+                field instanceof HTMLInputElement ? 'input' : 'change'
 
-            field.addEventListener(event, () => {
-                if (this.dynamicDelay) {
+            field.addEventListener(eventType, () => {
+                if (this.dynamicDelay !== null) {
                     clearTimeout(this.dynamicDelay)
                 }
 
                 this.setLoading(true)
 
                 this.dynamicDelay = setTimeout(() => {
-                    this.form.dispatchEvent(new Event('submit'))
+                    this.form.dispatchEvent(
+                        new Event('submit', {
+                            bubbles: true,
+                            cancelable: true,
+                        })
+                    )
 
                     this.dynamicDelay = null
                 }, delay)
@@ -129,7 +176,10 @@ class Form {
     }
 
     public setLoading(isLoading: boolean): Form {
-        const submitButtons = this.form.querySelectorAll<HTMLButtonElement>('button[type="submit"]')
+        const submitButtons =
+            this.form.querySelectorAll<HTMLButtonElement>(
+                'button[type="submit"]'
+            )
 
         submitButtons.forEach(submitButton => {
             if (!this.submitButtonTexts.has(submitButton)) {
@@ -141,25 +191,42 @@ class Form {
                 buttonText.innerHTML = inner
 
                 const buttonSpinner = document.createElement('i')
-                buttonSpinner.classList.add('fa-duotone', 'fa-fw', 'fa-spinner-third', 'fa-spin', 'd-none')
+                buttonSpinner.classList.add(
+                    'fa-duotone',
+                    'fa-fw',
+                    'fa-spinner-third',
+                    'fa-spin',
+                    'd-none'
+                )
 
                 submitButton.appendChild(buttonText)
                 submitButton.appendChild(buttonSpinner)
 
                 this.submitButtonTexts.set(submitButton, buttonText)
-                this.submitButtonSpinners.set(submitButton, buttonSpinner)
+                this.submitButtonSpinners.set(
+                    submitButton,
+                    buttonSpinner
+                )
             }
 
+            const buttonText =
+                this.submitButtonTexts.get(submitButton)
+
+            const buttonSpinner =
+                this.submitButtonSpinners.get(submitButton)
+
+            if (!buttonText || !buttonSpinner) {
+                return
+            }
+
+            submitButton.disabled = isLoading
+
             if (isLoading) {
-                submitButton.disabled = true
-
-                this.submitButtonTexts.get(submitButton).classList.add('d-none')
-                this.submitButtonSpinners.get(submitButton).classList.remove('d-none')
+                buttonText.classList.add('d-none')
+                buttonSpinner.classList.remove('d-none')
             } else {
-                submitButton.disabled = false
-
-                this.submitButtonSpinners.get(submitButton).classList.add('d-none')
-                this.submitButtonTexts.get(submitButton).classList.remove('d-none')
+                buttonSpinner.classList.add('d-none')
+                buttonText.classList.remove('d-none')
             }
         })
 
@@ -167,79 +234,80 @@ class Form {
     }
 
     public hideErrors(fieldName?: string): Form {
-        let invalidFeedbacksContainersDiv: NodeListOf<HTMLDivElement>
+        let invalidFeedbackContainers: NodeListOf<HTMLDivElement>
 
         if (fieldName) {
-            invalidFeedbacksContainersDiv = this.form.querySelectorAll<HTMLDivElement>(`div.invalid-feedbacks[data-field="${fieldName}"]`)
+            invalidFeedbackContainers =
+                this.form.querySelectorAll<HTMLDivElement>(
+                    `div.invalid-feedbacks[data-field="${CSS.escape(fieldName)}"]`
+                )
         } else {
-            invalidFeedbacksContainersDiv = this.form.querySelectorAll<HTMLDivElement>('div.invalid-feedbacks')
+            invalidFeedbackContainers =
+                this.form.querySelectorAll<HTMLDivElement>(
+                    'div.invalid-feedbacks'
+                )
         }
 
-        invalidFeedbacksContainersDiv.forEach(invalidFeedbacksContainerDiv => {
-            invalidFeedbacksContainerDiv.innerHTML = ''
+        invalidFeedbackContainers.forEach(container => {
+            container.innerHTML = ''
         })
 
         return this
     }
 
-    public displayError(fieldName: string, errorMessages: string | string[]): Form {
-        const fields = this.form.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>('[name="' + fieldName + '"]')
+    public displayError(
+        fieldName: string,
+        errorMessages: string | string[]
+    ): Form {
+        const fields = this.form.querySelectorAll<FormField>(
+            `[name="${CSS.escape(fieldName)}"]`
+        )
 
         fields.forEach(field => {
-            if (field.type !== 'checkbox' && field.type !== 'radio') {
-                let element = field
+            if (
+                field instanceof HTMLInputElement &&
+                (field.type === 'checkbox' || field.type === 'radio')
+            ) {
+                field.classList.add('is-invalid')
+                return
+            }
 
-                if (field.classList.contains('btn-check')) {
-                    if (field.nextElementSibling === document.querySelector('label[for="' + field.id + '"]')) {
-                        if (field.nextElementSibling instanceof HTMLInputElement) {
-                            element = field.nextElementSibling
-                        }
-                    }
+            let element: Element = field
+
+            if (
+                field instanceof HTMLInputElement &&
+                field.classList.contains('btn-check')
+            ) {
+                const label = this.form.querySelector<HTMLLabelElement>(
+                    `label[for="${CSS.escape(field.id)}"]`
+                )
+
+                if (field.nextElementSibling === label && label) {
+                    element = label
                 }
+            }
 
-                let invalidFeedbacksContainersDiv = this.form.querySelectorAll<HTMLDivElement>('div.invalid-feedbacks[data-field="' + field.name + '"]')
+            const invalidFeedbackContainers =
+                this.form.querySelectorAll<HTMLDivElement>(
+                    `div.invalid-feedbacks[data-field="${CSS.escape(field.name)}"]`
+                )
 
-                if (invalidFeedbacksContainersDiv.length) {
-                    invalidFeedbacksContainersDiv.forEach(invalidFeedbacksContainerDiv => {
-                        if (Array.isArray(errorMessages)) {
-                            errorMessages.forEach(errorMessage => {
-                                const invalidFeedbackDiv = document.createElement('div')
-                                invalidFeedbackDiv.classList.add('invalid-feedback', 'd-block')
-                                invalidFeedbackDiv.innerHTML = errorMessage
+            if (invalidFeedbackContainers.length > 0) {
+                invalidFeedbackContainers.forEach(container => {
+                    this.appendErrorMessages(
+                        container,
+                        errorMessages
+                    )
+                })
+            } else {
+                const container = document.createElement('div')
 
-                                invalidFeedbacksContainerDiv.appendChild(invalidFeedbackDiv)
-                            })
-                        } else {
-                            const invalidFeedbackDiv = document.createElement('div')
-                            invalidFeedbackDiv.classList.add('invalid-feedback', 'd-block')
-                            invalidFeedbackDiv.innerHTML = errorMessages
+                container.classList.add('invalid-feedbacks')
+                container.dataset.field = field.name
 
-                            invalidFeedbacksContainerDiv.appendChild(invalidFeedbackDiv)
-                        }
-                    })
-                } else {
-                    const invalidFeedbacksContainerDiv = document.createElement('div')
-                    invalidFeedbacksContainerDiv.classList.add('invalid-feedbacks')
-                    invalidFeedbacksContainerDiv.dataset.field = field.name
+                this.appendErrorMessages(container, errorMessages)
 
-                    if (Array.isArray(errorMessages)) {
-                        errorMessages.forEach(errorMessage => {
-                            const invalidFeedbackDiv = document.createElement('div')
-                            invalidFeedbackDiv.classList.add('invalid-feedback', 'd-block')
-                            invalidFeedbackDiv.innerHTML = errorMessage
-
-                            invalidFeedbacksContainerDiv.appendChild(invalidFeedbackDiv)
-                        })
-                    } else {
-                        const invalidFeedbackDiv = document.createElement('div')
-                        invalidFeedbackDiv.classList.add('invalid-feedback', 'd-block')
-                        invalidFeedbackDiv.innerHTML = errorMessages
-
-                        invalidFeedbacksContainerDiv.appendChild(invalidFeedbackDiv)
-                    }
-
-                    element.insertAdjacentElement('afterend', invalidFeedbacksContainerDiv)
-                }
+                element.insertAdjacentElement('afterend', container)
             }
 
             field.classList.add('is-invalid')
@@ -248,19 +316,43 @@ class Form {
         return this
     }
 
+    private appendErrorMessages(
+        container: HTMLDivElement,
+        errorMessages: string | string[]
+    ): void {
+        const messages = Array.isArray(errorMessages)
+            ? errorMessages
+            : [errorMessages]
+
+        messages.forEach(errorMessage => {
+            const invalidFeedback = document.createElement('div')
+
+            invalidFeedback.classList.add(
+                'invalid-feedback',
+                'd-block'
+            )
+
+            invalidFeedback.innerHTML = errorMessage
+
+            container.appendChild(invalidFeedback)
+        })
+    }
+
     public disableReset(): Form {
         this.reset = false
 
         return this
     }
 
-    public enableFetch(successCallback: Function = null, errorCallback: Function = null, preserveQueryParams: boolean = false): Form {
+    public enableFetch(
+        successCallback: FormCallback | null = null,
+        errorCallback: FormCallback | null = null,
+        preserveQueryParams: boolean = false
+    ): Form {
         this.form.addEventListener('submit', event => {
             event.preventDefault()
 
-            const fields = this.getFields()
-
-            fields.forEach((field: HTMLInputElement) => {
+            this.getFields().forEach(field => {
                 field.classList.remove('is-invalid')
             })
 
@@ -269,107 +361,136 @@ class Form {
 
             const body = this.form.serialize()
 
-            let action = this.form.getAttribute('action') ?? window.location.origin + window.location.pathname
-            const { method } = this.form
+            const action =
+                this.form.getAttribute('action') ??
+                window.location.origin + window.location.pathname
 
-            if (this.controller) {
-                this.controller.abort()
-            }
+            const method = this.form.method.toLowerCase()
 
+            this.controller?.abort()
             this.controller = new AbortController()
-            const { signal } = this.controller
 
-            let init: {
-                method: string,
-                headers: {
-                    Fetch: string
-                },
-                signal: AbortSignal,
-                body?: FormData,
-            } = {
-                method,
-                headers: {
-                    Fetch: 'true',
-                },
-                signal,
-            };
-
-            if (method === 'post') {
-                init = { ...init, body }
-            }
-
-            const actionUrl = new URL(action)
+            const actionUrl = new URL(action, window.location.href)
 
             if (preserveQueryParams) {
                 const activeUrl = new URL(window.location.href)
 
-                activeUrl.searchParams.forEach((value: string, name: string) => {
+                activeUrl.searchParams.forEach((value, name) => {
                     actionUrl.searchParams.append(name, value)
                 })
             }
 
+            const init: RequestInit = {
+                method,
+                headers: {
+                    Fetch: 'true',
+                },
+                signal: this.controller.signal,
+            }
+
+            if (method === 'post') {
+                init.body = body
+            }
+
             if (method === 'get') {
-                body.forEach((value: string, key: string) => {
-                    if (value.length > 0) {
-                        actionUrl.searchParams.append(key, value.toString())
+                body.forEach((value: FormDataEntryValue, key: string) => {
+                    const stringValue = value instanceof File ? value.name : value
+
+                    if (stringValue.length > 0) {
+                        actionUrl.searchParams.append(key, stringValue)
                     }
                 })
 
-                window.history.replaceState({}, null, actionUrl)
+                window.history.replaceState(
+                    {},
+                    '',
+                    actionUrl.toString()
+                )
             }
 
-            fetch(actionUrl, init).then(response => {
-                if (response.redirected && response.url.includes('login')) {
-                    window.location.reload()
+            fetch(actionUrl, init)
+                .then(async response => {
+                    if (
+                        response.redirected &&
+                        response.url.includes('login')
+                    ) {
+                        window.location.reload()
+                        return null
+                    }
 
-                    return
-                }
+                    return response.json() as Promise<FormResponse>
+                })
+                .then(data => {
+                    if (!data) {
+                        return
+                    }
 
-                return response.json()
-            }).then(data => {
-                if (data.errors) {
-                    Object.keys(data.errors).forEach((name) => {
-                        this.displayError(name, data.errors[name])
-                    })
-                }
+                    if (data.errors) {
+                        Object.entries(data.errors).forEach(
+                            ([name, messages]) => {
+                                this.displayError(name, messages)
+                            }
+                        )
+                    }
 
-                if (data.success && this.reset) {
-                    this.form.reset()
-                }
+                    if (data.success && this.reset) {
+                        this.form.reset()
+                    }
 
-                if (data.message) {
-                    displayToast(data.success ? ToastType.Success : ToastType.Error, data.message)
-                }
+                    if (data.message) {
+                        displayToast(
+                            data.success
+                                ? ToastType.Success
+                                : ToastType.Error,
+                            data.message
+                        )
+                    }
 
-                if (!data.success || data.success && this.parameters.enableButtonAfterSuccess) {
+                    if (
+                        !data.success ||
+                        this.parameters.enableButtonAfterSuccess
+                    ) {
+                        this.setLoading(false)
+                    }
+
+                    if (data.success) {
+                        successCallback?.(data)
+                    } else {
+                        errorCallback?.(data)
+                    }
+
+                    this.controller = null
+                })
+                .catch((error: unknown) => {
+                    if (
+                        error instanceof DOMException &&
+                        error.name === 'AbortError'
+                    ) {
+                        return
+                    }
+
                     this.setLoading(false)
-                }
 
-                if (data.success && successCallback) {
-                    successCallback(data)
-                }
-
-                if (!data.success && errorCallback) {
-                    errorCallback(data)
-                }
-
-                this.controller = null
-            }).catch((error) => {
-                if (error.name !== 'AbortError') {
-                    this.setLoading(false)
-
-                    console.error(error.message)
-                }
-            })
+                    if (error instanceof Error) {
+                        console.error(error.message)
+                    } else {
+                        console.error(error)
+                    }
+                })
         })
 
         return this
     }
 
-    private getFields(): (HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement)[] {
-        return Array.from(this.form.querySelectorAll('input[name]:not([type="hidden"]), textarea[name], select[name]'))
+    private getFields(): FormField[] {
+        return Array.from(
+            this.form.querySelectorAll<FormField>(
+                'input[name]:not([type="hidden"]), ' +
+                'textarea[name], ' +
+                'select[name]'
+            )
+        )
     }
-
 }
 
 export default Form

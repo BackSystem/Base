@@ -1,5 +1,4 @@
 export class Autogrow {
-
     private element: HTMLTextAreaElement
 
     constructor(element: HTMLTextAreaElement) {
@@ -15,24 +14,22 @@ export class Autogrow {
         this.onFocus()
     }
 
-    debounce(callback: Function, delay: number) {
-        let timer: NodeJS.Timeout
+    private debounce<TArgs extends unknown[]>(
+        callback: (...args: TArgs) => void,
+        delay: number
+    ): (...args: TArgs) => void {
+        let timer: ReturnType<typeof setTimeout>
 
-        return function () {
-            let args = arguments
-            let context = this
-
+        return (...args: TArgs): void => {
             clearTimeout(timer)
 
             timer = setTimeout(() => {
-                callback.apply(context, args)
+                callback(...args)
             }, delay)
         }
     }
 
-    onFocus() {
-        // console.log('onFocus')
-
+    private onFocus(): void {
         this.element.style.overflow = 'hidden'
         this.element.style.resize = 'none'
         this.element.style.boxSizing = 'border-box'
@@ -40,28 +37,20 @@ export class Autogrow {
         this.autogrow()
 
         window.addEventListener('resize', this.onResize)
-
         this.element.addEventListener('input', this.autogrow)
     }
 
-    onFocusOut() {
-        // console.log('onFocusOut')
-
+    private onFocusOut(): void {
         this.element.value = this.element.value.trim()
         this.autogrow()
     }
 
-    onResize() {
-        // console.log('onResize')
-
+    private onResize(): void {
         this.autogrow()
     }
 
-    autogrow() {
-        // console.log('Grow')
-
+    private autogrow(): void {
         this.element.style.height = 'auto'
-        this.element.style.height = this.element.scrollHeight + 'px'
+        this.element.style.height = `${this.element.scrollHeight}px`
     }
-
 }

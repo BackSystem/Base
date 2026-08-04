@@ -9,4 +9,4 @@ import './prototypes/Form'
 import './prototypes/Number'
 import './prototypes/String'
 
-globalThis.base = (document.querySelector('meta[name="base"]') as HTMLMetaElement)?.content
+export const base = document.querySelector<HTMLMetaElement>('meta[name="base"]')?.content

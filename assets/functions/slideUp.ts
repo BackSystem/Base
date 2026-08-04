@@ -1,27 +1,30 @@
-export default function slideUp(element, duration: number = 500) {
+export default function slideUp(
+	element: HTMLElement,
+	duration: number = 500
+): void {
 	element.style.removeProperty('display')
 
-	let display = window.getComputedStyle(element).display
+	const display = window.getComputedStyle(element).display
 
 	if (display === 'none') {
 		element.style.display = 'block'
 	}
 
-	let height = element.offsetHeight
+	const height = element.offsetHeight
 
 	element.style.overflow = 'hidden'
-	element.style.height = 0
-	element.style.paddingTop = 0
-	element.style.paddingBottom = 0
-	element.style.marginTop = 0
-	element.style.marginBottom = 0
-	element.style.opacity = 0
+	element.style.height = '0'
+	element.style.paddingTop = '0'
+	element.style.paddingBottom = '0'
+	element.style.marginTop = '0'
+	element.style.marginBottom = '0'
+	element.style.opacity = '0'
 
-	element.offsetHeight // eslint-disable-line no-unused-expressions
+	void element.offsetHeight
 
-	element.style.transitionProperty = `height, margin, padding, opacity`
-	element.style.transitionDuration = duration + 'ms'
-	element.style.height = height + 'px'
+	element.style.transitionProperty = 'height, margin, padding, opacity'
+	element.style.transitionDuration = `${duration}ms`
+	element.style.height = `${height}px`
 
 	element.style.removeProperty('padding-top')
 	element.style.removeProperty('padding-bottom')
@@ -29,7 +32,7 @@ export default function slideUp(element, duration: number = 500) {
 	element.style.removeProperty('margin-bottom')
 	element.style.removeProperty('opacity')
 
-	setTimeout(function () {
+	window.setTimeout(() => {
 		element.style.removeProperty('height')
 		element.style.removeProperty('overflow')
 		element.style.removeProperty('transition-duration')

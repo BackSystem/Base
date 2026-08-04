@@ -3,14 +3,14 @@ import { Tooltip } from 'bootstrap'
 export {}
 
 declare global {
-    interface HTMLElement {
+    interface HTMLButtonElement {
         setLoading(enable: boolean): void
     }
 }
 
 const buttons = new Map()
 
-HTMLElement.prototype.setLoading = function (enable: boolean = true) {
+HTMLButtonElement.prototype.setLoading = function (enable: boolean = true) {
     const tooltip = Tooltip.getInstance(this)
 
     if (tooltip) {

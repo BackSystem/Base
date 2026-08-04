@@ -1,10 +1,10 @@
-import { Basic, Fetch } from '@backsystem/select'
+import {Basic, Fetch} from '@backsystem/select'
 
-document.querySelectorAll('select:not([data-url])').forEach((select: HTMLSelectElement) => {
+document.querySelectorAll<HTMLSelectElement>('select:not([data-url])').forEach(select => {
     Basic.get(select)
 })
 
-document.querySelectorAll('select[data-url]').forEach((select: HTMLSelectElement) => {
+document.querySelectorAll<HTMLSelectElement>('select[data-url]').forEach(select => {
     Fetch.get(select)
 })
 
@@ -12,11 +12,11 @@ new MutationObserver(mutations => {
     mutations.forEach(mutation => {
         mutation.addedNodes.forEach(node => {
             if (node instanceof HTMLElement) {
-                node.querySelectorAll('select:not([data-url])').forEach((select: HTMLSelectElement) => {
+                node.querySelectorAll<HTMLSelectElement>('select:not([data-url])').forEach(select => {
                     Basic.get(select)
                 })
 
-                node.querySelectorAll('select[data-url]').forEach((select: HTMLSelectElement) => {
+                node.querySelectorAll<HTMLSelectElement>('select[data-url]').forEach(select => {
                     Fetch.get(select)
                 })
             }

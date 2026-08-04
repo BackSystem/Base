@@ -25,7 +25,11 @@ HTMLFormElement.prototype.serialize = function (includingBlank: boolean = true) 
             const name = field.name
 
             if (field instanceof HTMLInputElement && field.type === 'file') {
-                const file = field.files[0]
+                const file = field.files?.[0]
+
+                if (!file) {
+                    return
+                }
 
                 body.append(name, file)
             } else if (field instanceof HTMLInputElement && field.type === 'checkbox') {
