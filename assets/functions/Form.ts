@@ -29,12 +29,6 @@ class Form {
 
     private readonly form: HTMLFormElement
 
-    private readonly submitButtonTexts =
-        new Map<HTMLButtonElement, HTMLSpanElement>()
-
-    private readonly submitButtonSpinners =
-        new Map<HTMLButtonElement, HTMLElement>()
-
     private reset = true
 
     private dynamicDelay: ReturnType<typeof setTimeout> | null = null
@@ -157,7 +151,7 @@ class Form {
                     clearTimeout(this.dynamicDelay)
                 }
 
-                this.setLoading(true)
+                this.form.querySelectorAll<HTMLButtonElement>('button[type="submit"]').forEach(button => button.setLoading(true))
 
                 this.dynamicDelay = setTimeout(() => {
                     this.form.dispatchEvent(
@@ -170,64 +164,6 @@ class Form {
                     this.dynamicDelay = null
                 }, delay)
             })
-        })
-
-        return this
-    }
-
-    public setLoading(isLoading: boolean): Form {
-        const submitButtons =
-            this.form.querySelectorAll<HTMLButtonElement>(
-                'button[type="submit"]'
-            )
-
-        submitButtons.forEach(submitButton => {
-            if (!this.submitButtonTexts.has(submitButton)) {
-                const inner = submitButton.innerHTML
-
-                submitButton.innerHTML = ''
-
-                const buttonText = document.createElement('span')
-                buttonText.innerHTML = inner
-
-                const buttonSpinner = document.createElement('i')
-                buttonSpinner.classList.add(
-                    'fa-duotone',
-                    'fa-fw',
-                    'fa-spinner-third',
-                    'fa-spin',
-                    'd-none'
-                )
-
-                submitButton.appendChild(buttonText)
-                submitButton.appendChild(buttonSpinner)
-
-                this.submitButtonTexts.set(submitButton, buttonText)
-                this.submitButtonSpinners.set(
-                    submitButton,
-                    buttonSpinner
-                )
-            }
-
-            const buttonText =
-                this.submitButtonTexts.get(submitButton)
-
-            const buttonSpinner =
-                this.submitButtonSpinners.get(submitButton)
-
-            if (!buttonText || !buttonSpinner) {
-                return
-            }
-
-            submitButton.disabled = isLoading
-
-            if (isLoading) {
-                buttonText.classList.add('d-none')
-                buttonSpinner.classList.remove('d-none')
-            } else {
-                buttonSpinner.classList.add('d-none')
-                buttonText.classList.remove('d-none')
-            }
         })
 
         return this
@@ -356,7 +292,7 @@ class Form {
                 field.classList.remove('is-invalid')
             })
 
-            this.setLoading(true)
+            this.form.querySelectorAll<HTMLButtonElement>('button[type="submit"]').forEach(button => button.setLoading(true))
             this.hideErrors()
 
             const body = this.form.serialize()
@@ -450,7 +386,7 @@ class Form {
                         !data.success ||
                         this.parameters.enableButtonAfterSuccess
                     ) {
-                        this.setLoading(false)
+                        this.form.querySelectorAll<HTMLButtonElement>('button[type="submit"]').forEach(button => button.setLoading(false))
                     }
 
                     if (data.success) {
@@ -469,7 +405,7 @@ class Form {
                         return
                     }
 
-                    this.setLoading(false)
+                    this.form.querySelectorAll<HTMLButtonElement>('button[type="submit"]').forEach(button => button.setLoading(false))
 
                     if (error instanceof Error) {
                         console.error(error.message)

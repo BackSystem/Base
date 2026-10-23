@@ -25,7 +25,7 @@ export default function displayToast(type: ToastType, text: string, duration: nu
 		'        <div class="toast-body">' +
 		'            <div class="d-flex align-items-center float-start h-100">' +
 		'                <span class="fa-stack me-2">' +
-		'                    <i class="fa-solid fa-badge fa-stack-2x"></i>' +
+		'                    <i class="fa-solid fa-hexagon fa-stack-2x"></i>' +
 		'                    <i class="fa-solid fa-' + ToastIcon[type] + ' fa-stack-1x text-' + type + '"></i>' +
 		'                </span>' +
 		'            </div>' +

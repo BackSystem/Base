@@ -9,14 +9,6 @@ services:
 
     BackSystem\Base\Helper\Paginator\PaginatorInterface: '@BackSystem\Base\Helper\Paginator\Paginator'
 
-    BackSystem\Base\Maker\ControllerMaker:
-        tags: [ 'maker.command' ]
-        arguments: [ '@kernel', '@filesystem' ]
-
-    BackSystem\Base\Maker\EntityMaker:
-        tags: [ 'maker.command' ]
-        arguments: [ '@kernel', '@filesystem' ]
-
     doctrine.orm.naming_strategy.camel_case:
         class: 'BackSystem\Base\Orm\NamingStrategy\CamelCaseNamingStrategy'
 
@@ -89,3 +81,13 @@ services:
     BackSystem\Base\Twig\SizeExtension:
         tags: [ 'twig.extension' ]
         arguments: [ '@twig' ]
+
+when@dev:
+    services:
+        BackSystem\Base\Maker\ControllerMaker:
+            tags: [ 'maker.command' ]
+            arguments: [ '@kernel', '@filesystem' ]
+
+        BackSystem\Base\Maker\EntityMaker:
+            tags: [ 'maker.command' ]
+            arguments: [ '@kernel', '@filesystem' ]
