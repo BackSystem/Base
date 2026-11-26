@@ -55,7 +55,6 @@ final class TimestampSubscriber
                     continue;
                 }
 
-                /* @phpstan-ignore-next-line */
                 $object->setCreatedBy($this->security->getUser());
             }
 
@@ -86,7 +85,6 @@ final class TimestampSubscriber
                     continue;
                 }
 
-                /* @phpstan-ignore-next-line */
                 $object->setDeletedBy($this->security->getUser());
             }
 

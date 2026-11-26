@@ -2,6 +2,10 @@
 
 namespace BackSystem\Base\Orm\Subscriber;
 
+use Doctrine\DBAL\Schema\ForeignKeyConstraint;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint\ReferentialAction;
+use Doctrine\DBAL\Schema\SchemaEditor;
+use Doctrine\DBAL\Schema\TableEditor;
 use Doctrine\ORM\Tools\Event\GenerateSchemaEventArgs;
 
 final class ForeignKeysSubscriber
@@ -16,54 +20,91 @@ final class ForeignKeysSubscriber
             throw new \RuntimeException('Default schema name not set.');
         }
 
-        $schema = $args->getSchema();
+        $schemaEditor = $args->getSchema()->edit();
 
         foreach ($entityManager->getMetadataFactory()->getAllMetadata() as $metaData) {
             $schemaName = $metaData->getSchemaName();
 
-            // This is an entity on another database, we don't want to handle it
+            // Ignore entities belonging to another database
             if ($schemaName && $schemaName !== $defaultSchemaName) {
                 continue;
             }
 
-            // Fetch all relations of the entity
             foreach ($metaData->associationMappings as $mapping) {
                 $targetMetaData = $entityManager->getClassMetadata($mapping['targetEntity']);
                 $targetSchemaName = $targetMetaData->getSchemaName() ?: $defaultSchemaName;
 
-                // The relation is on the same schema, so no problem here
+                // Ignore relations within the same schema
                 if ($targetSchemaName === $defaultSchemaName) {
                     continue;
                 }
 
                 if (!empty($mapping['joinTable'])) {
                     foreach ($mapping['joinTable']['inverseJoinColumns'] as $inverseColumn) {
-                        $options = ['onUpdate' => 'cascade'];
-
-                        if (!empty($inverseColumn['onDelete'])) {
-                            $options['onDelete'] = $inverseColumn['onDelete'];
-                        }
-
-                        $foreignTable = $targetSchemaName.'.'.$targetMetaData->getTableName();
-
-                        // Add the foreign key
-                        $schema->getTable($mapping['joinTable']['name'])->addForeignKeyConstraint($foreignTable, [$inverseColumn['name']], [$inverseColumn['referencedColumnName']], $options);
+                        $this->addForeignKey(
+                            $schemaEditor,
+                            $mapping['joinTable']['schema'] ?? null,
+                            $mapping['joinTable']['name'],
+                            $targetSchemaName,
+                            $targetMetaData->getTableName(),
+                            $inverseColumn['name'],
+                            $inverseColumn['referencedColumnName'],
+                            $inverseColumn['onDelete'] ?? null,
+                        );
                     }
                 } elseif (!empty($mapping['joinColumns'])) {
                     foreach ($mapping['joinColumns'] as $joinColumn) {
-                        $options = ['onUpdate' => 'cascade'];
-
-                        if (!empty($joinColumn['onDelete'])) {
-                            $options['onDelete'] = $joinColumn['onDelete'];
-                        }
-
-                        $foreignTable = $targetSchemaName.'.'.$targetMetaData->getTableName();
-
-                        // Add the foreign key
-                        $schema->getTable($metaData->getTableName())->addForeignKeyConstraint($foreignTable, [$joinColumn['name']], [$joinColumn['referencedColumnName']], $options);
+                        $this->addForeignKey(
+                            $schemaEditor,
+                            $schemaName,
+                            $metaData->getTableName(),
+                            $targetSchemaName,
+                            $targetMetaData->getTableName(),
+                            $joinColumn['name'],
+                            $joinColumn['referencedColumnName'],
+                            $joinColumn['onDelete'] ?? null,
+                        );
                     }
                 }
             }
         }
+
+        $args->setSchema($schemaEditor->create());
+    }
+
+    private function addForeignKey(
+        SchemaEditor $schemaEditor,
+        ?string $schemaName,
+        string $tableName,
+        string $targetSchemaName,
+        string $targetTableName,
+        string $columnName,
+        string $referencedColumnName,
+        ?string $onDelete,
+    ): void {
+        $foreignKeyEditor = ForeignKeyConstraint::editor()
+            ->setUnquotedReferencingColumnNames($columnName)
+            ->setUnquotedReferencedTableName(
+                $targetTableName,
+                $targetSchemaName,
+            )
+            ->setUnquotedReferencedColumnNames($referencedColumnName)
+            ->setOnUpdateAction(ReferentialAction::CASCADE);
+
+        if (!empty($onDelete)) {
+            $foreignKeyEditor->setOnDeleteAction(
+                ReferentialAction::from(strtoupper($onDelete)),
+            );
+        }
+
+        $schemaEditor->modifyTableByUnquotedName(
+            $tableName,
+            static function (TableEditor $tableEditor) use ($foreignKeyEditor): void {
+                $tableEditor->addForeignKeyConstraint(
+                    $foreignKeyEditor->create(),
+                );
+            },
+            $schemaName,
+        );
     }
 }

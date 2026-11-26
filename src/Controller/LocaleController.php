@@ -29,17 +29,16 @@ class LocaleController
         $referer = $request->headers->get('referer');
 
         if ($referer) {
-            $path  = parse_url($referer, PHP_URL_PATH) ?? '';
+            $path = parse_url($referer, PHP_URL_PATH) ?? '';
             $query = parse_url($referer, PHP_URL_QUERY);
 
-            $target = $path . ($query ? '?' . $query : '');
+            $target = $path.($query ? '?'.$query : '');
 
-            if ($target !== '' && str_starts_with($target, '/') && !str_starts_with($target, '//')) {
+            if ('' !== $target && str_starts_with($target, '/') && !str_starts_with($target, '//')) {
                 return new RedirectResponse($target, 302);
             }
         }
 
         return new RedirectResponse($this->urlGenerator->generate($this->redirectRoute), 302);
     }
-
 }
